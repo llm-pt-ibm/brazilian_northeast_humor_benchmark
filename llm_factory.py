@@ -7,11 +7,10 @@ class LLMFactory:
         provider = config.get("provider")
 
         if provider == "huggingface":
-            return HuggingFaceLLM(
-                model_name=config["model_name"],
-                task=config.get("task", "text-generation"),
-                device=config.get("device", -1),
-                token=config['token']
+            return HuggingFaceLLM(**{
+                key: config[key]
+                for key in ["model_name", "task", "device", "token"]
+                if key in config}
             )
 
         elif provider == "openai":

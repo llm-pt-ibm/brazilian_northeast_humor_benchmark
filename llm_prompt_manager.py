@@ -2,7 +2,7 @@ class PromptManager:
     def __init__(self):
         pass
 
-    def get_punchlines_prompt(self, humorous_text, text_origin, specific_contexts = ''):
+    def get_punchlines_prompt(self, humorous_text, text_origin):
         punchlines_prompt = f'''Dado o seguinte texto humorístico, transcrito a partir de um {text_origin}, identifique todas as punchlines presentes.
         Definição de punchline: A punchline é a parte de uma piada que provoca o efeito cômico, sendo responsável pela resolução da piada. Ela ocorre quando o receptor reinterpreta a informação e faz uma conexão inesperada entre as partes do texto, gerando o riso.
         Extraia todas as punchlines do texto, ou seja, as partes que representam a resolução cômica.
@@ -12,28 +12,25 @@ class PromptManager:
         ["Primeira punchline identificada",
             "Segunda punchline identificada",
             "...outras punchlines, se existirem..."]
-        {f"Considere os seguintes contextos específicos relacionados ao texto humorístico: {specific_contexts}" if specific_contexts else ""}
         Texto humorístico: {humorous_text}
         Responda apenas no formato de lista.'''
         
         return punchlines_prompt
 
-    def get_comic_styles_prompts(self, humorous_text, text_origin, specific_contexts = ''):
+    def get_comic_styles_prompts(self, humorous_text, text_origin):
         styles_definitions = self.get_styles_definitions()
         for comic_style, style_definition in styles_definitions.items():
             comic_style_prompt = f'''Dado o seguinte texto humorístico, transcrito a partir de um {text_origin}, avalie se ele contém o estilo cômico "{comic_style}".
             Definição de {comic_style}: {style_definition}
             Responda com 1 (caso positivo) ou 0 (caso negativo), sem detalhes adicionais.
-            {f"Considere os seguintes contextos específicos relacionados ao texto humorístico: {specific_contexts}" if specific_contexts else ""}
             Texto: {humorous_text}
             Responda apenas no formato booleano sem explicações adicionais.
             '''
 
             yield comic_style_prompt
     
-    def get_text_explanation_prompt(self, humorous_text, text_origin, specific_contexts = ''):
+    def get_text_explanation_prompt(self, humorous_text, text_origin):
         text_explanation_prompt = f'''Explique o motivo do humor presente no seguinte texto, transcrito a partir de um {text_origin}. Aponte os elementos que contribuem para seu efeito cômico.
-        {f"Considere os seguintes contextos específicos relacionados ao texto humorístico: {specific_contexts}" if specific_contexts else ""}
         Texto: {humorous_text}
         Responda apenas com a explicação, sem detalhes adicionais.'''
 

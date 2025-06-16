@@ -2,10 +2,10 @@ class PromptManager:
     def __init__(self):
         pass
 
-    def get_punchlines_prompt(self, humorous_text, text_origin):
-        punchlines_prompt = f'''Dado o seguinte texto humorístico, transcrito a partir de um {text_origin}, identifique todas as punchlines presentes.
+    def get_punchlines_prompt(self, humorous_text):
+        punchlines_prompt = f'''Dado o seguinte texto humorístico, identifique todas as punchlines presentes.
         Definição de punchline: A punchline é a parte de uma piada que provoca o efeito cômico, sendo responsável pela resolução da piada. Ela ocorre quando o receptor reinterpreta a informação e faz uma conexão inesperada entre as partes do texto, gerando o riso.
-        Extraia todas as punchlines do texto, ou seja, as partes que representam a resolução cômica.
+        Identifique apenas as partes que representam a resolução cômica (punchlines).
         Cada punchline deve ser registrada como um item em uma lista.
         Não adicione explicações ou trechos irrelevantes.
         Forneça a resposta no seguinte formato de lista:
@@ -17,22 +17,23 @@ class PromptManager:
         
         return punchlines_prompt
 
-    def get_comic_styles_prompts(self, humorous_text, text_origin):
+    def get_comic_styles_prompts(self, humorous_text):
         styles_definitions = self.get_styles_definitions()
         for comic_style, style_definition in styles_definitions.items():
-            comic_style_prompt = f'''Dado o seguinte texto humorístico, transcrito a partir de um {text_origin}, avalie se ele contém o estilo cômico "{comic_style}".
+            comic_style_prompt = f'''Dado o seguinte texto humorístico, avalie se ele contém o estilo cômico ”{style_definition}”.
             Definição de {comic_style}: {style_definition}
-            Responda com 1 (caso positivo) ou 0 (caso negativo), sem detalhes adicionais.
+            Responda com 1 se sim, ou 0 se não.
             Texto: {humorous_text}
-            Responda apenas no formato booleano sem explicações adicionais.
+            Não inclua explicações ou qualquer outro texto além do número.
             '''
 
             yield comic_style_prompt
     
-    def get_text_explanation_prompt(self, humorous_text, text_origin):
-        text_explanation_prompt = f'''Explique o motivo do humor presente no seguinte texto, transcrito a partir de um {text_origin}. Aponte os elementos que contribuem para seu efeito cômico.
+    def get_text_explanation_prompt(self, humorous_text):
+        text_explanation_prompt = f'''Explique o motivo do humor presente no seguinte texto. Aponte os elementos que contribuem para seu efeito cômico.
         Texto: {humorous_text}
-        Responda apenas com a explicação, sem detalhes adicionais.'''
+        Responda apenas com a explicação, sem detalhes adicionais.
+        '''
 
         return text_explanation_prompt
 
@@ -47,4 +48,5 @@ class PromptManager:
             "sarcasmo": "O sarcasmo tem como propósito primordial infligir dano emocional ao outro. A pessoa sarcástica é caracterizada por traços de hostilidade e desprezo, utilizando a exposição impiedosa de imperfeições e falhas percebidas num mundo considerado corrupto. O público ideal para a manifestação do sarcasmo frequentemente consiste em indivíduos em posição de subordinação ou dependência. Quem pontua alto em sarcasmo tende a se ver como crítico e mordaz ao denunciar o que considera corrupção e maldade, demonstrando propensão ao escárnio e ao prazer pelo infortúnio.",
             "cinismo": "O cinismo direciona-se à desvalorização de valores amplamente aceitos pela sociedade. Indivíduos cínicos exibem uma atitude pessimista e destrutiva, empregando o desencanto e a zombaria para evidenciar as fragilidades do mundo. Embora não se caracterizem pela ausência total de valores morais, os cínicos desprezam normas e conceitos morais convencionais, considerando-os absurdos."
             }
+        
         return styles_definitions

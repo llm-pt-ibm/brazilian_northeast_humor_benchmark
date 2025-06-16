@@ -5,9 +5,8 @@ class DatasetLoader:
         self.file_path = file_path
     
     def load_dataset(self):
-        columns_to_check = [
+        columns_to_check = ['video_url',
         "corrected_transcription",
-        "text_origin",
         "punchlines",
         "fun",
         "humor",

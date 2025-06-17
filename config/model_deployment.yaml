@@ -1,0 +1,14 @@
+models:
+  - provider: openai
+    model_name: gpt-4
+    api_key: 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
+
+  - provider: gemini
+    model_name: gemini-2.5-flash
+    api_key: AIzaSyAKRtRE0hNarABxLev6Gy48mmslNwQs41M
+
+#  - provider: huggingface
+#    model_name: ibm-granite/granite-4.0-tiny-preview
+#    task: text-generation
+#    device: -1
+#    token: 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

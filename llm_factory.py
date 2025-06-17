@@ -1,5 +1,6 @@
 from hugging_face_llm import HuggingFaceLLM
-from api_llm import ApiLLM
+from open_ai_llm import OpenAiLLM
+from gemini_llm import GeminiLLM
 
 class LLMFactory:
     @staticmethod
@@ -14,9 +15,15 @@ class LLMFactory:
             )
 
         elif provider == "openai":
-            return ApiLLM(
+            return OpenAiLLM(
                 api_key=config["api_key"],
                 model_name=config.get("model_name", "gpt-4")
+            )
+
+        elif provider == "gemini":
+            return GeminiLLM(
+                api_key=config["api_key"],
+                model_name=config.get("model_name", "gemini-pro")
             )
 
         else:

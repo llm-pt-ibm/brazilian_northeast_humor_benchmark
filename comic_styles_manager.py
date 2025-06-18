@@ -18,7 +18,7 @@ class ComicStylesManager():
         return styles_definitions
     
     def get_comic_styles(self):
-        all_comic_styles = self.get_styles_definitions.keys()
+        all_comic_styles = self.get_styles_definitions().keys()
         return all_comic_styles
     
     def get_comic_style_pt_br_translation(self, comic_style):

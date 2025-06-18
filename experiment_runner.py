@@ -1,40 +1,45 @@
 import os
+import time
 import json
 from comic_styles_manager import ComicStylesManager
 from dataset_loader import DatasetLoader
+from json_saver import JSONSaver
 from llm_prompt_manager import LLMPromptManager
 from models_loader import ModelsLoader
+import openai
 
 class ExperimentRunner:
 
     def __init__(self):
         dataset_loader = DatasetLoader('./data/brazilian_ne_annotated_humorous_texts.csv')
-        self.df = dataset_loader.load_dataset().sample(2)
+        self.df = dataset_loader.load_dataset()
         self.llm_prompt_manager = LLMPromptManager()
         self.comic_styles_manager = ComicStylesManager()
         self.models_loader = ModelsLoader()
+        self.json_saver = JSONSaver()
 
     def execute(self):
         models = self.models_loader.load_models_from_config_file()
         for model in models:
+            print('--- Punchlines phase ---')
             self.execute_punchlines_experiment(model)
-            # self.execute_comic_styles_experiment(model)
-            # self.execute_explanations_experiment(model)
-
-    def _prepare_results_path(self, model, experiment_name, filename="results.json"):
-        dir_path = os.path.join("results", model.model_name, experiment_name)
-        os.makedirs(dir_path, exist_ok=True)
-        return os.path.join(dir_path, filename)
+            print('--- Comic Styles phase ---')
+            self.execute_comic_styles_experiment(model)
+            print('--- Texts Explanations phase ---')
+            self.execute_explanations_experiment(model)
 
     def execute_punchlines_experiment(self, model):
-        results_path = self._prepare_results_path(model, "punchlines")
-        results = {}
+        filename = os.path.join("results", model.model_name, 'punchlines_results.json')
+        results = self._load_existing_results(filename)
 
         for i, row in self.df.iterrows():
             video_url = row["video_url"]
+            if video_url in results:
+                continue
+
             humorous_text = row["corrected_transcription"]
             prompt = self.llm_prompt_manager.get_punchlines_prompt(humorous_text)
-            model_output = model.generate(prompt)
+            model_output = self._safe_generate(model, prompt)
 
             results[video_url] = {
                 "model_name": model.model_name,
@@ -44,19 +49,80 @@ class ExperimentRunner:
                 "annotated_punchlines": row["punchlines"]
             }
 
-        with open(results_path, "w", encoding="utf-8") as f:
-            json.dump(results, f, ensure_ascii=False, indent=2)
+            print(f'Step {i + 1} completed.')
+            self.json_saver.save_results(results, filename)
 
     def execute_comic_styles_experiment(self, model):
-        results_path = self._prepare_results_path(model, "comic_styles")
+        filename = os.path.join("results", model.model_name, 'comic_styles_results.json')
+        results = self._load_existing_results(filename)
+
         comic_styles = self.comic_styles_manager.get_comic_styles()
-        annotated_comic_styles = self.df[comic_styles]
-        # TODO: Implementar lógica
-        pass
+
+        for i, row in self.df.iterrows():
+            video_url = row["video_url"]
+            if video_url in results:
+                continue
+
+            humorous_text = row["corrected_transcription"]
+            comic_styles_prompts = self.llm_prompt_manager.get_comic_styles_prompts(humorous_text)
+
+            model_outputs = {}
+            for comic_style in comic_styles:
+                current_prompt = comic_styles_prompts[comic_style]
+                model_outputs[comic_style] = self._safe_generate(model, current_prompt)
+
+            results[video_url] = {
+                "model_name": model.model_name,
+                "humorous_text": humorous_text,
+                "prompts": comic_styles_prompts,
+                "annotated_comic_styles": dict(row[comic_styles]),
+                "model_comic_styles": model_outputs
+            }
+
+            print(f'Step {i + 1} completed.')
+            self.json_saver.save_results(results, filename)
 
     def execute_explanations_experiment(self, model):
-        results_path = self._prepare_results_path(model, "explanations")
-        explanations_prompt = self.llm_prompt_manager.get_text_explanation_prompt()
-        annotated_explanations = self.df["joke_explanation"]
-        # TODO: Implementar lógica
-        pass
+        filename = os.path.join("results", model.model_name, 'texts_explanations_results.json')
+        results = self._load_existing_results(filename)
+
+        for i, row in self.df.iterrows():
+            video_url = row["video_url"]
+            if video_url in results:
+                continue
+
+            humorous_text = row["corrected_transcription"]
+            prompt = self.llm_prompt_manager.get_text_explanation_prompt(humorous_text)
+            model_output = self._safe_generate(model, prompt)
+
+            results[video_url] = {
+                "model_name": model.model_name,
+                "humorous_text": humorous_text,
+                "prompt": prompt,
+                "model_text_explanation": model_output,
+                "annotated_text_explanation": row["joke_explanation"]
+            }
+
+            print(f'Step {i + 1} completed.')
+            self.json_saver.save_results(results, filename)
+
+    def _load_existing_results(self, filepath):
+        if os.path.exists(filepath):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return {}
+
+    def _safe_generate(self, model, prompt, max_retries=5, wait_seconds=10):
+        retries = 0
+        while retries < max_retries:
+            try:
+                return model.generate(prompt)
+            except openai.RateLimitError:
+                print(f"Rate limit reached. Waiting {wait_seconds} seconds before retrying...")
+                time.sleep(wait_seconds)
+                retries += 1
+            except Exception as e:
+                print(f"Unexpected error during generation: {e}")
+                time.sleep(wait_seconds)
+                retries += 1
+        raise RuntimeError("Max retries exceeded for model.generate()")

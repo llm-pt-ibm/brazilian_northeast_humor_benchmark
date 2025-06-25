@@ -1,0 +1,9 @@
+{
+    "gpt-4": {
+        "punchlines": {
+            "dice_similarity": 0.73,
+            "jaccard_similarity": 0.61,
+            "levenshtein_distance": 24.05
+        }
+    }
+}

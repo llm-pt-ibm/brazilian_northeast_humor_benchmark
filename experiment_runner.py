@@ -21,6 +21,7 @@ class ExperimentRunner:
     def execute(self):
         models = self.models_loader.load_models_from_config_file()
         for model in models:
+            print(f'--- {model.model_name}')
             print('--- Punchlines phase ---')
             self.execute_punchlines_experiment(model)
             print('--- Texts Explanations phase ---')
@@ -29,19 +30,19 @@ class ExperimentRunner:
             self.execute_comic_styles_experiment(model)
 
     def execute_punchlines_experiment(self, model):
-        filename = os.path.join("results", model.model_name, 'punchlines_results.json')
-        results = self._load_existing_results(filename)
+        filename = os.path.join("predictions", model.model_name, 'punchlines_predictions.json')
+        predictions = self._load_existing_predictions(filename)
 
         for i, row in self.df.iterrows():
             video_url = row["video_url"]
-            if video_url in results:
+            if video_url in predictions:
                 continue
 
             humorous_text = row["corrected_transcription"]
             prompt = self.llm_prompt_manager.get_punchlines_prompt(humorous_text)
             model_output = self._safe_generate(model, prompt)
 
-            results[video_url] = {
+            predictions[video_url] = {
                 "model_name": model.model_name,
                 "humorous_text": humorous_text,
                 "prompt": prompt,
@@ -50,18 +51,20 @@ class ExperimentRunner:
             }
 
             print(f'Step {i + 1} completed.')
-            self.json_saver.save_results(results, filename)
+            self.json_saver.save_json(predictions, filename)
 
     def execute_comic_styles_experiment(self, model):
-        filename = os.path.join("results", model.model_name, 'comic_styles_results.json')
-        results = self._load_existing_results(filename)
+        filename = os.path.join("predictions", model.model_name, 'comic_styles_predictions.json')
+        predictions = self._load_existing_predictions(filename)
 
         comic_styles = self.comic_styles_manager.get_comic_styles()
 
         for i, row in self.df.iterrows():
             video_url = row["video_url"]
-            if video_url in results:
-                continue
+            if video_url in predictions:
+                if 'model_comic_styles' in predictions[video_url]:
+                    if len(predictions[video_url]['model_comic_styles']) == 8:
+                        continue
 
             humorous_text = row["corrected_transcription"]
             comic_styles_prompts = self.llm_prompt_manager.get_comic_styles_prompts(humorous_text)
@@ -71,7 +74,7 @@ class ExperimentRunner:
                 current_prompt = comic_styles_prompts[comic_style]
                 model_outputs[comic_style] = self._safe_generate(model, current_prompt)
 
-            results[video_url] = {
+            predictions[video_url] = {
                 "model_name": model.model_name,
                 "humorous_text": humorous_text,
                 "prompts": comic_styles_prompts,
@@ -80,22 +83,22 @@ class ExperimentRunner:
             }
 
             print(f'Step {i + 1} completed.')
-            self.json_saver.save_results(results, filename)
+            self.json_saver.save_json(predictions, filename)
 
     def execute_explanations_experiment(self, model):
-        filename = os.path.join("results", model.model_name, 'texts_explanations_results.json')
-        results = self._load_existing_results(filename)
+        filename = os.path.join("predictions", model.model_name, 'texts_explanations_predictions.json')
+        predictions = self._load_existing_predictions(filename)
 
         for i, row in self.df.iterrows():
             video_url = row["video_url"]
-            if video_url in results:
+            if video_url in predictions:
                 continue
 
             humorous_text = row["corrected_transcription"]
             prompt = self.llm_prompt_manager.get_text_explanation_prompt(humorous_text)
             model_output = self._safe_generate(model, prompt)
 
-            results[video_url] = {
+            predictions[video_url] = {
                 "model_name": model.model_name,
                 "humorous_text": humorous_text,
                 "prompt": prompt,
@@ -104,9 +107,9 @@ class ExperimentRunner:
             }
 
             print(f'Step {i + 1} completed.')
-            self.json_saver.save_results(results, filename)
+            self.json_saver.save_json(predictions, filename)
 
-    def _load_existing_results(self, filepath):
+    def _load_existing_predictions(self, filepath):
         if os.path.exists(filepath):
             with open(filepath, 'r', encoding='utf-8') as f:
                 return json.load(f)

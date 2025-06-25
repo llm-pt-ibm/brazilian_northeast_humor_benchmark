@@ -23,10 +23,10 @@ class ExperimentRunner:
         for model in models:
             print('--- Punchlines phase ---')
             self.execute_punchlines_experiment(model)
-            print('--- Comic Styles phase ---')
-            self.execute_comic_styles_experiment(model)
             print('--- Texts Explanations phase ---')
             self.execute_explanations_experiment(model)
+            print('--- Comic Styles phase ---')
+            self.execute_comic_styles_experiment(model)
 
     def execute_punchlines_experiment(self, model):
         filename = os.path.join("results", model.model_name, 'punchlines_results.json')

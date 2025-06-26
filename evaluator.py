@@ -20,8 +20,8 @@ class Evaluator():
                 continue
             results[model_name] = {
                 "punchlines": self.evaluate_punchlines_predictions(model_name),
-                #"comic_styles": self.evaluate_comic_styles_predictions(model_folder),
-                #"texts_explanations": self.evaluate_texts_explanations_predictions(model_folder)
+                "comic_styles": self.evaluate_comic_styles_predictions(model_name),
+                #"texts_explanations": self.evaluate_texts_explanations_predictions(model_name)
             }
 
         JSONSaver.save_json(results, os.path.join('evaluation', 'results.json'))
@@ -58,8 +58,10 @@ class Evaluator():
         with open(file_path, 'r', encoding='utf-8') as f:
             comic_styles_predictions = json.load(f)
         
-        comic_styles = ComicStylesManager.get_comic_styles()
-        f1_score_results = {comic_style:{} for comic_style in comic_styles}
+        comic_styles = ComicStylesManager().get_comic_styles()
+        f1_score_trues_and_preds = {comic_style:{'pred': [], 'true': []} for comic_style in comic_styles}
+        pred_labels = []
+        true_labels = []
         hamming_loss_results = []
 
         for video_url in comic_styles_predictions:
@@ -68,11 +70,34 @@ class Evaluator():
             annotated = current_row['annotated_comic_styles']
             predicted = current_row['model_comic_styles']
 
-            annot_zeros_and_ones = [current_row['annotated_comic_styles'][comic_style] for comic_style in comic_styles]
-            model_zeros_and_ones = [current_row['model_comic_styles'][comic_style] for comic_style in comic_styles]
+            for comic_style in comic_styles:
+                f1_score_trues_and_preds[comic_style]['true'].append(int(annotated[comic_style]))
+                f1_score_trues_and_preds[comic_style]['pred'].append(int(predicted[comic_style]))
+
+            annot_zeros_and_ones = [int(annotated[comic_style]) for comic_style in comic_styles]
+            model_zeros_and_ones = [int(predicted[comic_style]) for comic_style in comic_styles]
+
+            true_labels.append(annot_zeros_and_ones)
+            pred_labels.append(model_zeros_and_ones)
+
             hamming_loss_results.append(MultilabelClassificationMetrics.hamming_loss(y_true=annot_zeros_and_ones, y_pred=model_zeros_and_ones))
 
-        comic_styles_evaluation = {'f1_score': f1_score_results, 'hamming_loss': hamming_loss_results}
+        f1_score_results = {
+            comic_style: MultilabelClassificationMetrics.f1_score(y_pred = data['pred'], y_true = data['true'], average = 'binary')
+            for comic_style, data in f1_score_trues_and_preds.items()
+        }
+
+        # Calcular o F1-score macro (média entre classes)
+        f1_macro = MultilabelClassificationMetrics.f1_score(y_true = true_labels, y_pred = pred_labels, average='macro')
+
+        # Ou micro (considera todos os 1s e 0s como um único vetor)
+        f1_micro = MultilabelClassificationMetrics.f1_score(y_true = true_labels, y_pred = pred_labels, average='micro')
+
+        comic_styles_evaluation = {'f1_score': f1_score_results,
+                                   'f1_macro': f1_macro,
+                                   'f1_micro': f1_micro,
+                                   'hamming_loss': mean(hamming_loss_results)}
+        
         return comic_styles_evaluation
 
     def evaluate_texts_explanations_predictions(self):

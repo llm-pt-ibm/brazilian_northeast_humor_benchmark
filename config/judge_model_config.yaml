@@ -1,0 +1,4 @@
+models:
+  - provider: openai
+    model_name: o3
+    api_key: ''

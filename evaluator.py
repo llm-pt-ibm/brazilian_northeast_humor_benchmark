@@ -1,5 +1,6 @@
 from multilabel_classification_metrics import MultilabelClassificationMetrics
 from text_overlap_metrics import TextOverlapMetrics
+from judge_model import JudgeModel
 from statistics import mean
 from json_saver import JSONSaver
 from comic_styles_manager import ComicStylesManager
@@ -28,7 +29,6 @@ class Evaluator():
 
     def evaluate_punchlines_predictions(self, model_name):
         file_path = os.path.join('predictions', model_name, 'punchlines_predictions.json')
-
         with open(file_path, 'r', encoding='utf-8') as f:
             punchlines = json.load(f)
         
@@ -46,9 +46,9 @@ class Evaluator():
             levenshtein_results.append(TextOverlapMetrics.levenshtein_distance(predicted, annotated))
 
         punchlines_evaluation = {
-            "dice_similarity" : round(mean(dice_results), 2),
-            "jaccard_similarity": round(mean(jaccard_results), 2),
-            "levenshtein_distance": round(mean(levenshtein_results), 2)
+            "dice_similarity" : round(mean(dice_results), 4),
+            "jaccard_similarity": round(mean(jaccard_results), 4),
+            "levenshtein_distance": round(mean(levenshtein_results), 4)
         }
 
         return punchlines_evaluation
@@ -82,23 +82,23 @@ class Evaluator():
 
             hamming_loss_results.append(MultilabelClassificationMetrics.hamming_loss(y_true=annot_zeros_and_ones, y_pred=model_zeros_and_ones))
 
-        f1_score_results = {
+        f1_binary = {
             comic_style: MultilabelClassificationMetrics.f1_score(y_pred = data['pred'], y_true = data['true'], average = 'binary')
-            for comic_style, data in f1_score_trues_and_preds.items()
-        }
-
-        # Calcular o F1-score macro (média entre classes)
+            for comic_style, data in f1_score_trues_and_preds.items()}
         f1_macro = MultilabelClassificationMetrics.f1_score(y_true = true_labels, y_pred = pred_labels, average='macro')
-
-        # Ou micro (considera todos os 1s e 0s como um único vetor)
         f1_micro = MultilabelClassificationMetrics.f1_score(y_true = true_labels, y_pred = pred_labels, average='micro')
 
-        comic_styles_evaluation = {'f1_score': f1_score_results,
+        comic_styles_evaluation = {'f1_score': f1_binary,
                                    'f1_macro': f1_macro,
                                    'f1_micro': f1_micro,
-                                   'hamming_loss': mean(hamming_loss_results)}
+                                   'hamming_loss': round(mean(hamming_loss_results), 4)}
         
         return comic_styles_evaluation
 
-    def evaluate_texts_explanations_predictions(self):
-        pass
+    def evaluate_texts_explanations_predictions(self, model_name):
+        file_path = os.path.join('predictions', model_name, 'texts_explanations_predictions.json')
+        with open(file_path, 'r', encoding='utf-8') as f:
+            texts_explanations = json.load(f)
+
+        judge_model = JudgeModel()
+        

@@ -1,10 +1,11 @@
-from multilabel_classification_metrics import MultilabelClassificationMetrics
-from text_overlap_metrics import TextOverlapMetrics
-from judge_model import JudgeModel
-from statistics import mean
-from json_saver import JSONSaver
 from comic_styles_manager import ComicStylesManager
+from json_saver import JSONSaver
+from judge_model import JudgeModel
+from multilabel_classification_metrics import MultilabelClassificationMetrics
+from statistics import mean
 from string_utils import StringUtils
+from text_overlap_metrics import TextOverlapMetrics
+
 import ast
 import json
 import os
@@ -21,19 +22,20 @@ class Evaluator():
         for model_name in self.predictions:
             punchlines_agg, punchlines_ind = self.evaluate_punchlines_predictions(model_name)
             comic_styles_agg, comic_styles_ind = self.evaluate_comic_styles_predictions(model_name)
-            #texts_explanations_agg, texts_explanations_ind = self.evaluate_texts_explanations_predictions(model_name)
+            texts_explanations_agg, texts_explanations_ind = self.evaluate_texts_explanations_predictions(model_name)
 
             results[model_name] = {
                 "punchlines": punchlines_agg,
-                "comic_styles": comic_styles_agg
+                "comic_styles": comic_styles_agg,
+                "texts_explanations": texts_explanations_agg
             }
 
             all_individual_metrics[model_name] = {
                 "punchlines": punchlines_ind,
-                "comic_styles": comic_styles_ind
+                "comic_styles": comic_styles_ind,
+                "texts_explanations": texts_explanations_ind
             }
 
-        os.makedirs('evaluation', exist_ok=True)
         JSONSaver.save_json(results, os.path.join('evaluation', 'aggregate_metrics.json'))
         JSONSaver.save_json(all_individual_metrics, os.path.join('evaluation', 'individual_metrics.json'))
 
@@ -114,7 +116,6 @@ class Evaluator():
             hamming_loss_results.append(hamming)
 
             individual_metrics.append({
-                "model_name": model_name,
                 "video_url": video_url,
                 **current_row,
                 "hamming_loss": hamming,
@@ -143,6 +144,7 @@ class Evaluator():
 
         judge_model = JudgeModel()
         agreement_level_results = []
+        individual_metrics = []
 
         for video_url in texts_explanations:
             current_row = texts_explanations[video_url]
@@ -150,3 +152,16 @@ class Evaluator():
             predicted = current_row['model_text_explanation']
 
             agreement_level_response_json = json.loads(judge_model.get_agreement_level(annotated_text=annotated, model_text=predicted))
+            current_agreement_level = int(agreement_level_response_json['nivel_concordancia'])
+            agreement_level_results.append(current_agreement_level)
+
+            individual_metrics.append({
+                "video_url": video_url,
+                **current_row,
+                "judging_model_results": agreement_level_response_json,
+            })
+
+        texts_explanations_results = mean(agreement_level_results)
+
+        return texts_explanations_results, individual_metrics
+

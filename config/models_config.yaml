@@ -11,4 +11,4 @@ models:
 #    model_name: ibm-granite/granite-4.0-tiny-preview
 #    task: text-generation
 #    device: -1
-#    token: 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
+#    token: 

@@ -3,7 +3,7 @@ import yaml
 
 class ModelsLoader():
 
-    def __init__(self, config_path: str = "./config/model_deployment.yaml"):
+    def __init__(self, config_path: str = "./config/models_config.yaml"):
         self.config_path = config_path
 
     def load_models_from_config_file(self):

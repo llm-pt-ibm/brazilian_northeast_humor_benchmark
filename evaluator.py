@@ -13,31 +13,42 @@ import os
 class Evaluator():
 
     def __init__(self):
-        self.predictions = os.listdir('./predictions')
+        pass
 
     def evaluate_models_predictions(self):
-        results = {}
-        all_individual_metrics = {}
+        def load_json(path):
+            return json.load(open(path, 'r', encoding='utf-8')) if os.path.exists(path) else {}
 
-        for model_name in self.predictions:
-            punchlines_agg, punchlines_ind = self.evaluate_punchlines_predictions(model_name)
-            comic_styles_agg, comic_styles_ind = self.evaluate_comic_styles_predictions(model_name)
-            texts_explanations_agg, texts_explanations_ind = self.evaluate_texts_explanations_predictions(model_name)
+        def save():
+            JSONSaver.save_json(results, aggregate_path)
+            JSONSaver.save_json(all_individual_metrics, individual_path)
 
-            results[model_name] = {
-                "punchlines": punchlines_agg,
-                "comic_styles": comic_styles_agg,
-                "texts_explanations": texts_explanations_agg
-            }
+        def evaluate_phase(model_name, phase_key, eval_func, message):
+            if phase_key not in results[model_name]:
+                print(message)
+                agg, ind = eval_func(model_name)
+                results[model_name][phase_key] = agg
+                all_individual_metrics[model_name][phase_key] = ind
+                save()
 
-            all_individual_metrics[model_name] = {
-                "punchlines": punchlines_ind,
-                "comic_styles": comic_styles_ind,
-                "texts_explanations": texts_explanations_ind
-            }
+        aggregate_path = os.path.join('evaluation', 'aggregate_metrics.json')
+        individual_path = os.path.join('evaluation', 'individual_metrics.json')
+        predictions = os.listdir('./predictions')
 
-        JSONSaver.save_json(results, os.path.join('evaluation', 'aggregate_metrics.json'))
-        JSONSaver.save_json(all_individual_metrics, os.path.join('evaluation', 'individual_metrics.json'))
+        results = load_json(aggregate_path)
+        all_individual_metrics = load_json(individual_path)
+
+        phases_by_priority = [
+            ("punchlines", self.evaluate_punchlines_predictions, "--- Text Overlap Metrics phase ---"),
+            ("comic_styles", self.evaluate_comic_styles_predictions, "--- Comic Styles Classification Metrics phase ---"),
+            ("texts_explanations", self.evaluate_texts_explanations_predictions, "--- Texts Explanations Agreement Metrics phase ---"),
+        ]
+
+        for phase_key, eval_func, message in phases_by_priority:
+            for model_name in predictions:
+                results.setdefault(model_name, {})
+                all_individual_metrics.setdefault(model_name, {})
+                evaluate_phase(model_name, phase_key, eval_func, f'--- {model_name} ---\n{message}')
 
     def evaluate_punchlines_predictions(self, model_name):
         file_path = os.path.join('predictions', model_name, 'punchlines_predictions.json')
@@ -138,30 +149,55 @@ class Evaluator():
         return comic_styles_evaluation, individual_metrics
 
     def evaluate_texts_explanations_predictions(self, model_name):
-        file_path = os.path.join('predictions', model_name, 'texts_explanations_predictions.json')
-        with open(file_path, 'r', encoding='utf-8') as f:
+        input_path = os.path.join('predictions', model_name, 'texts_explanations_predictions.json')
+        output_path = os.path.join('evaluation', 'texts_explanations_evaluation_results.json')
+
+        with open(input_path, 'r', encoding='utf-8') as f:
             texts_explanations = json.load(f)
+
+        if os.path.exists(output_path):
+            with open(output_path, 'r', encoding='utf-8') as f:
+                processed_results = json.load(f)
+        else:
+            processed_results = {}
+
+        if model_name not in processed_results:
+            processed_results[model_name] = {}
 
         judge_model = JudgeModel()
         agreement_level_results = []
         individual_metrics = []
 
-        for video_url in texts_explanations:
-            current_row = texts_explanations[video_url]
+        for video_url, current_row in texts_explanations.items():
+            if video_url in processed_results[model_name]:
+                result = processed_results[model_name][video_url]
+                agreement_level_results.append(int(result['judge_model_results']['nivel_concordancia']))
+                individual_metrics.append(result)
+                continue 
+
             annotated = current_row['annotated_text_explanation']
             predicted = current_row['model_text_explanation']
 
-            agreement_level_response_json = json.loads(judge_model.get_agreement_level(annotated_text=annotated, model_text=predicted))
-            current_agreement_level = int(agreement_level_response_json['nivel_concordancia'])
-            agreement_level_results.append(current_agreement_level)
+            try:
+                agreement_level_response_json = json.loads(judge_model.get_agreement_level(annotated_text=annotated, model_text=predicted))
+                current_agreement_level = int(agreement_level_response_json['nivel_concordancia'])
+            except Exception as e:
+                print(f"[Erro] Falha ao avaliar {video_url}: {e}")
+                continue
 
-            individual_metrics.append({
+            current_result = {
                 "video_url": video_url,
                 **current_row,
-                "judging_model_results": agreement_level_response_json,
-            })
+                "judge_model_results": agreement_level_response_json,
+            }
 
-        texts_explanations_results = mean(agreement_level_results)
+            processed_results[model_name][video_url] = current_result
+            agreement_level_results.append(current_agreement_level)
+            individual_metrics.append(current_result)
+
+            print(f'Step {model_name} - {video_url} completed')
+            JSONSaver.save_json(processed_results, output_path)
+
+        texts_explanations_results = mean(agreement_level_results) if agreement_level_results else 0
 
         return texts_explanations_results, individual_metrics
-

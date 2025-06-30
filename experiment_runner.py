@@ -21,13 +21,13 @@ class ExperimentRunner:
     def execute(self):
         models = self.models_loader.load_models_from_config_file()
         for model in models:
-            print(f'--- {model.model_name}')
+            print(f'--- {model.model_name} ---')
             print('--- Punchlines phase ---')
             self.execute_punchlines_experiment(model)
             print('--- Texts Explanations phase ---')
             self.execute_explanations_experiment(model)
-            print('--- Comic Styles phase ---')
-            self.execute_comic_styles_experiment(model)
+            #print('--- Comic Styles phase ---')
+            #self.execute_comic_styles_experiment(model)
 
     def execute_punchlines_experiment(self, model):
         filename = os.path.join("predictions", model.model_name, 'punchlines_predictions.json')

@@ -15,6 +15,14 @@ class StringUtils:
         return text
 
     @staticmethod
+    def extract_list_of_strings_from_text(text: str) -> list[str]:
+        pattern = r"\[.*?\]"
+        matches = re.findall(pattern, text)
+
+        for match in matches:
+            return match
+
+    @staticmethod
     def replace_external_double_quotes(text):
         return re.sub(r'\["(.*)"\]', r"['\1']", text)
     

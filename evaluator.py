@@ -6,7 +6,6 @@ from statistics import mean
 from string_utils import StringUtils
 from text_overlap_metrics import TextOverlapMetrics
 
-import ast
 import json
 import os
 
@@ -63,13 +62,8 @@ class Evaluator():
         for video_url in punchlines:
             current_row = punchlines[video_url]
             annotated = current_row['annotated_punchlines']
-            formatted_model_punchlines = StringUtils().replace_external_double_quotes(current_row['model_punchlines'])
-            try:
-                predicted_list = ast.literal_eval(formatted_model_punchlines)
-            except SyntaxError:
-                formatted_model_punchlines = StringUtils().replace_external_single_quotes(current_row['model_punchlines'])
-                predicted_list = ast.literal_eval(formatted_model_punchlines)
-            predicted = '; '.join(predicted_list)
+            formatted_model_punchlines = StringUtils().extract_list_of_strings_from_text(current_row['model_punchlines'])
+            predicted = '; '.join(formatted_model_punchlines)
 
             dice = TextOverlapMetrics.dice_similarity(predicted, annotated)
             jaccard = TextOverlapMetrics.jaccard_similarity(predicted, annotated)

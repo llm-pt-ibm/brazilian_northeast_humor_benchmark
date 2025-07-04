@@ -1,12 +1,13 @@
+import openai
+import json
 import os
 import time
-import json
+
 from comic_styles_manager import ComicStylesManager
 from dataset_loader import DatasetLoader
 from json_saver import JSONSaver
 from llm_prompt_manager import LLMPromptManager
 from models_loader import ModelsLoader
-import openai
 
 class ExperimentRunner:
 
@@ -26,8 +27,8 @@ class ExperimentRunner:
             self.execute_punchlines_experiment(model)
             print('--- Texts Explanations phase ---')
             self.execute_explanations_experiment(model)
-            #print('--- Comic Styles phase ---')
-            #self.execute_comic_styles_experiment(model)
+            print('--- Comic Styles phase ---')
+            self.execute_comic_styles_experiment(model)
 
     def execute_punchlines_experiment(self, model):
         filename = os.path.join("predictions", model.model_name, 'punchlines_predictions.json')

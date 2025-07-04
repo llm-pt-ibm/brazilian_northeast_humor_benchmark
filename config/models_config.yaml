@@ -7,6 +7,12 @@ models:
     model_name: gemini-2.5-flash
     api_key: ''
 
+  - provider: ibmcloud
+    model_id: ibm/granite-3-3-8b-instruct
+    api_key: ''
+    service_url: ''
+    project_id: ''
+
 #  - provider: huggingface
 #    model_name: ibm-granite/granite-4.0-tiny-preview
 #    task: text-generation

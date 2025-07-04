@@ -44,5 +44,12 @@
             "hamming_loss": 0.3468421052631579
         },
         "texts_explanations": 4.282105263157895
+    },
+    "granite-3-3-8b-instruct": {
+        "punchlines": {
+            "dice_similarity": 0.5091666666666667,
+            "jaccard_similarity": 0.3430930930930931,
+            "levenshtein_distance": 37
+        }
     }
 }

@@ -50,6 +50,7 @@
             "dice_similarity": 0.5091666666666667,
             "jaccard_similarity": 0.3430930930930931,
             "levenshtein_distance": 37
-        }
+        },
+        "texts_explanations": 3.642105263157895
     }
 }

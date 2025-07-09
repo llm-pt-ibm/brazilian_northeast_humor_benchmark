@@ -41,7 +41,12 @@ class ExperimentRunner:
 
             humorous_text = row["corrected_transcription"]
             prompt = self.llm_prompt_manager.get_punchlines_prompt(humorous_text)
-            model_output = self._safe_generate(model, prompt)
+            
+            try:
+                model_output = self._safe_generate(model, prompt)
+            except RuntimeError as e:
+                print(str(e))
+                break
 
             predictions[video_url] = {
                 "model_name": model.model_name,
@@ -71,9 +76,18 @@ class ExperimentRunner:
             comic_styles_prompts = self.llm_prompt_manager.get_comic_styles_prompts(humorous_text)
 
             model_outputs = {}
+            need_to_break = False
             for comic_style in comic_styles:
                 current_prompt = comic_styles_prompts[comic_style]
-                model_outputs[comic_style] = self._safe_generate(model, current_prompt)
+                try:
+                    model_outputs[comic_style] = self._safe_generate(model, current_prompt)
+                except RuntimeError as e:
+                    print(str(e))
+                    need_to_break = True
+                    break
+
+            if need_to_break:
+                break
 
             predictions[video_url] = {
                 "model_name": model.model_name,
@@ -97,7 +111,12 @@ class ExperimentRunner:
 
             humorous_text = row["corrected_transcription"]
             prompt = self.llm_prompt_manager.get_text_explanation_prompt(humorous_text)
-            model_output = self._safe_generate(model, prompt)
+
+            try:
+                model_output = self._safe_generate(model, prompt)
+            except RuntimeError as e:
+                print(str(e))
+                break
 
             predictions[video_url] = {
                 "model_name": model.model_name,

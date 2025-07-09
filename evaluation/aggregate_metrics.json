@@ -52,5 +52,12 @@
             "levenshtein_distance": 37
         },
         "texts_explanations": 3.642105263157895
+    },
+    "llama-3-405b-instruct": {
+        "punchlines": {
+            "dice_similarity": 0.5925354190516346,
+            "jaccard_similarity": 0.47061927864642744,
+            "levenshtein_distance": 24.08
+        }
     }
 }

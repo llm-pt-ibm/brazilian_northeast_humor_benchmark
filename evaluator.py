@@ -1,7 +1,7 @@
 from comic_styles_manager import ComicStylesManager
 from json_saver import JSONSaver
 from judge_model import JudgeModel
-from multilabel_classification_metrics import MultilabelClassificationMetrics
+from sklearn.metrics import f1_score, hamming_loss
 from statistics import mean
 from string_utils import StringUtils
 from text_overlap_metrics import TextOverlapMetrics
@@ -93,51 +93,70 @@ class Evaluator():
         file_path = os.path.join('predictions', model_name, 'comic_styles_predictions.json')
         with open(file_path, 'r', encoding='utf-8') as f:
             comic_styles_predictions = json.load(f)
-        
+
         comic_styles = ComicStylesManager().get_comic_styles()
-        f1_score_trues_and_preds = {comic_style: {'pred': [], 'true': []} for comic_style in comic_styles}
-        pred_labels = []
-        true_labels = []
-        hamming_loss_results = []
+        style_keys = list(comic_styles)
 
-        individual_metrics = []
+        f1_data = {style: {'true': [], 'pred': []} for style in style_keys}
+        true_labels, pred_labels, hamming_loss_results, individual_metrics = [], [], [], []
 
-        for video_url in comic_styles_predictions:
-            current_row = comic_styles_predictions[video_url]
+        total_predictions = 0
+        valid_predictions = 0
+
+        for video_url, current_row in comic_styles_predictions.items():
             annotated = current_row['annotated_comic_styles']
             predicted = current_row['model_comic_styles']
 
-            for comic_style in comic_styles:
-                f1_score_trues_and_preds[comic_style]['true'].append(int(annotated[comic_style]))
-                f1_score_trues_and_preds[comic_style]['pred'].append(int(predicted[comic_style]))
+            valid_annot_ones = []
+            valid_pred_ones = []
 
-            annot_ones = [int(annotated[comic_style]) for comic_style in comic_styles]
-            pred_ones = [int(predicted[comic_style]) for comic_style in comic_styles]
+            for style in style_keys:
+                true_val = annotated.get(style)
+                pred_val = StringUtils.extract_binary_digit(predicted.get(style))
+                total_predictions += 1
 
-            true_labels.append(annot_ones)
-            pred_labels.append(pred_ones)
+                if pred_val in {"0", "1"}:
+                    true_int = int(true_val)
+                    pred_int = int(pred_val)
 
-            hamming = MultilabelClassificationMetrics.hamming_loss(y_true=annot_ones, y_pred=pred_ones)
-            hamming_loss_results.append(hamming)
+                    f1_data[style]['true'].append(true_int)
+                    f1_data[style]['pred'].append(pred_int)
 
-            individual_metrics.append({
-                "video_url": video_url,
-                **current_row,
-                "hamming_loss": hamming,
-            })
+                    valid_annot_ones.append(true_int)
+                    valid_pred_ones.append(pred_int)
+                    valid_predictions += 1
 
-        f1_binary = {comic_style: MultilabelClassificationMetrics.f1_score(
-                y_pred=data['pred'], y_true=data['true'], average='binary')
-                for comic_style, data in f1_score_trues_and_preds.items()}
+            if valid_annot_ones:
+                hamming = hamming_loss(y_true=valid_annot_ones, y_pred=valid_pred_ones)
+                hamming_loss_results.append(hamming)
 
-        f1_macro = MultilabelClassificationMetrics.f1_score(y_true=true_labels, y_pred=pred_labels, average='macro')
-        f1_micro = MultilabelClassificationMetrics.f1_score(y_true=true_labels, y_pred=pred_labels, average='micro')
+                true_labels.append(valid_annot_ones)
+                pred_labels.append(valid_pred_ones)
+
+                individual_metrics.append({
+                    "video_url": video_url,
+                    **current_row,
+                    "hamming_loss": hamming,
+                })
+            else:
+                individual_metrics.append({
+                    "video_url": video_url,
+                    **current_row,
+                    "hamming_loss": None,
+                })
+
+        f1_binary = {
+            style: f1_score(y_true=data['true'], y_pred=data['pred'], average='binary')
+            for style, data in f1_data.items()
+            if data['true'] and data['pred']
+        }
 
         comic_styles_evaluation = {
             'f1_score': f1_binary,
-            'f1_macro': f1_macro,
-            'f1_micro': f1_micro,
-            'hamming_loss': mean(hamming_loss_results)
+            'f1_macro': f1_score(true_labels, pred_labels, average='macro') if true_labels else 0.0,
+            'f1_micro': f1_score(true_labels, pred_labels, average='micro') if true_labels else 0.0,
+            'hamming_loss': mean(hamming_loss_results) if hamming_loss_results else 0.0,
+            'hit_rate': valid_predictions / total_predictions if total_predictions > 0 else 0.0
         }
 
         return comic_styles_evaluation, individual_metrics

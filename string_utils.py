@@ -16,23 +16,40 @@ class StringUtils:
         return text
 
     @staticmethod
+    def extract_binary_digit(value: str) -> str | None:
+        match = re.search(r'\b[01]\b', value.strip())
+        if match:
+            return match.group(0)
+        return None
+
+    @staticmethod
     def extract_list_of_strings_from_text(text: str) -> list[str]:
         match = re.search(r"\[.*?\]", text, re.DOTALL)
+        if not match:
+            return []
+
         list_str = match.group()
 
-        formatted_strings_list = StringUtils().replace_external_double_quotes(list_str)
-        try:
-            strings_list = ast.literal_eval(list_str)
-        except SyntaxError:
-            formatted_strings_list = StringUtils().replace_external_single_quotes(list_str)
-            strings_list = ast.literal_eval(formatted_strings_list)
+        cleaned_str = StringUtils.clean_quoted_string_list(list_str)
 
-        return strings_list
-        
+        try:
+            strings_list = ast.literal_eval(cleaned_str)
+            if isinstance(strings_list, list) and all(isinstance(item, str) for item in strings_list):
+                return strings_list
+        except Exception:
+            pass
+
+        return []
+
     @staticmethod
-    def replace_external_double_quotes(text):
-        return re.sub(r'\["(.*)"\]', r"['\1']", text)
-    
-    @staticmethod
-    def replace_external_single_quotes(text):
-        return re.sub(r"\['(.*)'\]", r'["\1"]', text)
+    def clean_quoted_string_list(text: str) -> str:
+        # Corrige ["texto"] que veio com aspas duplicadas: ["texto""]
+        # Substitui aspas duplicadas internas por aspas simples, com cuidado
+        text = re.sub(r'""', '"', text)  # corrige aspas duplas duplicadas internas
+        text = re.sub(r"''", "'", text)
+
+        # Remove aspas externas duplicadas: ["'texto'"] -> ["texto"]
+        text = re.sub(r'\["([\'"])(.*?)\1"\]', r'["\2"]', text)
+        text = re.sub(r"\['([\"'])(.*?)\1'\]", r"['\2']", text)
+
+        return text

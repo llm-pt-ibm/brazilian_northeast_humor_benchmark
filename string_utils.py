@@ -23,13 +23,48 @@ class StringUtils:
         return None
 
     @staticmethod
+    def has_list_structure(text: str) -> bool:
+        """Verifica se o texto contém uma lista (mesmo que mal formatada)."""
+        match = re.search(r"\[.*?\]", text, re.DOTALL)
+        return bool(match)
+
+    @staticmethod
+    def has_no_quote_errors(text: str) -> bool:
+        if re.search(r'""', text) or re.search(r"''", text):
+            return False
+
+        if re.search(r'\["([\'"]).*?\1"\]', text):
+            return False
+        if re.search(r"\['([\"']).*?\1'\]", text):
+            return False
+
+        return True
+
+    @staticmethod
+    def is_valid_list_of_strings(text: str) -> bool:
+        # Primeiro: tem estrutura de lista?
+        if not StringUtils.has_list_structure(text):
+            return False
+
+        # Segundo: não pode ter erros de aspas
+        if not StringUtils.has_no_quote_errors(text):
+            return False
+
+        # Agora tenta avaliar o texto limpo
+        try:
+            val = ast.literal_eval(text)
+            if isinstance(val, list) and all(isinstance(item, str) for item in val):
+                return True
+        except Exception:
+            return False
+
+    @staticmethod
     def extract_list_of_strings_from_text(text: str) -> list[str]:
         match = re.search(r"\[.*?\]", text, re.DOTALL)
         if not match:
             return []
 
         list_str = match.group()
-
         cleaned_str = StringUtils.clean_quoted_string_list(list_str)
 
         try:
@@ -43,12 +78,9 @@ class StringUtils:
 
     @staticmethod
     def clean_quoted_string_list(text: str) -> str:
-        # Corrige ["texto"] que veio com aspas duplicadas: ["texto""]
-        # Substitui aspas duplicadas internas por aspas simples, com cuidado
-        text = re.sub(r'""', '"', text)  # corrige aspas duplas duplicadas internas
+        text = re.sub(r'""', '"', text) 
         text = re.sub(r"''", "'", text)
 
-        # Remove aspas externas duplicadas: ["'texto'"] -> ["texto"]
         text = re.sub(r'\["([\'"])(.*?)\1"\]', r'["\2"]', text)
         text = re.sub(r"\['([\"'])(.*?)\1'\]", r"['\2']", text)
 

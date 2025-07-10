@@ -23,7 +23,7 @@ class Evaluator():
             JSONSaver.save_json(all_individual_metrics, individual_path)
 
         def evaluate_phase(model_name, phase_key, eval_func, message):
-            if phase_key not in results[model_name]:
+            if not (phase_key == 'texts_explanations' and phase_key in results[model_name]):
                 print(message)
                 agg, ind = eval_func(model_name)
                 results[model_name][phase_key] = agg
@@ -59,10 +59,23 @@ class Evaluator():
         levenshtein_results = []
         individual_metrics = []
 
+        total = len(punchlines)
+        hits_original_format = 0
+        hits_after_treatment = 0
+
         for video_url in punchlines:
             current_row = punchlines[video_url]
             annotated = current_row['annotated_punchlines']
-            formatted_model_punchlines = StringUtils().extract_list_of_strings_from_text(current_row['model_punchlines'])
+            raw_model_output = current_row['model_punchlines']
+
+            if StringUtils.is_valid_list_of_strings(raw_model_output):
+                hits_original_format += 1
+
+            formatted_model_punchlines = StringUtils.extract_list_of_strings_from_text(raw_model_output)
+
+            if formatted_model_punchlines:
+                hits_after_treatment += 1
+
             predicted = '; '.join(formatted_model_punchlines)
 
             dice = TextOverlapMetrics.dice_similarity(predicted, annotated)
@@ -79,12 +92,16 @@ class Evaluator():
                 "dice_similarity": dice,
                 "jaccard_similarity": jaccard,
                 "levenshtein_distance": levenshtein,
+                "is_original_format_valid": StringUtils.is_valid_list_of_strings(raw_model_output),
+                "is_after_treatment_valid": bool(formatted_model_punchlines)
             })
 
         punchlines_evaluation = {
             "dice_similarity": mean(dice_results),
             "jaccard_similarity": mean(jaccard_results),
-            "levenshtein_distance": mean(levenshtein_results)
+            "levenshtein_distance": mean(levenshtein_results),
+            "hit_rate_pre_treatment": hits_original_format / total,
+            "hit_rate": hits_after_treatment / total
         }
 
         return punchlines_evaluation, individual_metrics
@@ -101,7 +118,8 @@ class Evaluator():
         true_labels, pred_labels, hamming_loss_results, individual_metrics = [], [], [], []
 
         total_predictions = 0
-        valid_predictions = 0
+        hits_original_format = 0
+        hits_after_treatment = 0
 
         for video_url, current_row in comic_styles_predictions.items():
             annotated = current_row['annotated_comic_styles']
@@ -112,10 +130,17 @@ class Evaluator():
 
             for style in style_keys:
                 true_val = annotated.get(style)
-                pred_val = StringUtils.extract_binary_digit(predicted.get(style))
+                raw_pred_val = predicted.get(style)
                 total_predictions += 1
 
+                if raw_pred_val in {"0", "1"}:
+                    hits_original_format += 1
+
+                pred_val = StringUtils.extract_binary_digit(raw_pred_val)
+
                 if pred_val in {"0", "1"}:
+                    hits_after_treatment += 1
+
                     true_int = int(true_val)
                     pred_int = int(pred_val)
 
@@ -124,7 +149,6 @@ class Evaluator():
 
                     valid_annot_ones.append(true_int)
                     valid_pred_ones.append(pred_int)
-                    valid_predictions += 1
 
             if valid_annot_ones:
                 hamming = hamming_loss(y_true=valid_annot_ones, y_pred=valid_pred_ones)
@@ -156,7 +180,8 @@ class Evaluator():
             'f1_macro': f1_score(true_labels, pred_labels, average='macro') if true_labels else 0.0,
             'f1_micro': f1_score(true_labels, pred_labels, average='micro') if true_labels else 0.0,
             'hamming_loss': mean(hamming_loss_results) if hamming_loss_results else 0.0,
-            'hit_rate': valid_predictions / total_predictions if total_predictions > 0 else 0.0
+            'hit_rate_pre_treatment': hits_original_format / total_predictions if total_predictions > 0 else 0.0,
+            'hit_rate': hits_after_treatment / total_predictions if total_predictions > 0 else 0.0,
         }
 
         return comic_styles_evaluation, individual_metrics

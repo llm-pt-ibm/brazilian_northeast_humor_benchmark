@@ -1,0 +1,98 @@
+{
+    "granite-3-3-8b-instruct": {
+        "punchlines": {
+            "dice_similarity": 0.5282609896234128,
+            "jaccard_similarity": 0.3997352914132536,
+            "levenshtein_distance": 31.28842105263158
+        },
+        "comic_styles": {
+            "f1_score": {
+                "fun": 0.0,
+                "humor": 0.2222222222222222,
+                "nonsense": 0.0,
+                "wit": 0.30501089324618735,
+                "irony": 0.20245398773006135,
+                "satire": 0.11320754716981132,
+                "sarcasm": 0.16260162601626016,
+                "cynicism": 0.06060606060606061
+            },
+            "f1_macro": 0.13326279212382539,
+            "f1_micro": 0.164804469273743,
+            "hamming_loss": 0.47210526315789475,
+            "hit_rate": 1.0
+        },
+        "texts_explanations": 3.642105263157895
+    },
+    "gemini-2.5-flash": {
+        "punchlines": {
+            "dice_similarity": 0.6778335081234601,
+            "jaccard_similarity": 0.5606147184303101,
+            "levenshtein_distance": 19.029473684210526
+        },
+        "comic_styles": {
+            "f1_score": {
+                "fun": 0.7867298578199052,
+                "humor": 0.5683760683760684,
+                "nonsense": 0.5333333333333333,
+                "wit": 0.8302425106990015,
+                "irony": 0.5397590361445783,
+                "satire": 0.42953020134228187,
+                "sarcasm": 0.4943820224719101,
+                "cynicism": 0.3501683501683502
+            },
+            "f1_macro": 0.5665651725444286,
+            "f1_micro": 0.6254872563718141,
+            "hamming_loss": 0.3605658198614319,
+            "hit_rate": 1.0
+        },
+        "texts_explanations": 4.635789473684211
+    },
+    "gpt-4": {
+        "punchlines": {
+            "dice_similarity": 0.7286309002872607,
+            "jaccard_similarity": 0.6064354369207384,
+            "levenshtein_distance": 24.04
+        },
+        "comic_styles": {
+            "f1_score": {
+                "fun": 0.8515111695137977,
+                "humor": 0.5561904761904762,
+                "nonsense": 0.508235294117647,
+                "wit": 0.7623188405797101,
+                "irony": 0.5996055226824457,
+                "satire": 0.5191489361702127,
+                "sarcasm": 0.48427672955974843,
+                "cynicism": 0.31213872832369943
+            },
+            "f1_macro": 0.5741782121422172,
+            "f1_micro": 0.6373142542652724,
+            "hamming_loss": 0.3468421052631579,
+            "hit_rate": 1.0
+        },
+        "texts_explanations": 4.282105263157895
+    },
+    "llama-3-405b-instruct": {
+        "punchlines": {
+            "dice_similarity": 0.590931409026572,
+            "jaccard_similarity": 0.469323732087723,
+            "levenshtein_distance": 24.12842105263158
+        },
+        "comic_styles": {
+            "f1_score": {
+                "fun": 0.8388746803069054,
+                "humor": 0.7385103011093502,
+                "nonsense": 0.4563106796116505,
+                "wit": 0.845771144278607,
+                "irony": 0.6635071090047393,
+                "satire": 0.4293193717277487,
+                "sarcasm": 0.577962577962578,
+                "cynicism": 0.36
+            },
+            "f1_macro": 0.6137819830001974,
+            "f1_micro": 0.6760037348272643,
+            "hamming_loss": 0.36526315789473685,
+            "hit_rate": 1.0
+        },
+        "texts_explanations": 3.9726315789473685
+    }
+}

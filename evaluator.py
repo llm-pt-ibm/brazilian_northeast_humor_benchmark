@@ -1,7 +1,7 @@
 from comic_styles_manager import ComicStylesManager
 from json_saver import JSONSaver
 from judge_model import JudgeModel
-from sklearn.metrics import f1_score, hamming_loss
+from sklearn.metrics import f1_score, hamming_loss, precision_score, recall_score, accuracy_score
 from statistics import mean
 from string_utils import StringUtils
 from text_overlap_metrics import TextOverlapMetrics
@@ -129,7 +129,7 @@ class Evaluator():
             valid_pred_ones = []
 
             for style in style_keys:
-                true_val = annotated.get(style)
+                raw_true_val = annotated.get(style)
                 raw_pred_val = predicted.get(style)
                 total_predictions += 1
 
@@ -137,12 +137,13 @@ class Evaluator():
                     hits_original_format += 1
 
                 pred_val = StringUtils.extract_binary_digit(raw_pred_val)
+                true_val = StringUtils.extract_binary_digit(raw_true_val)
 
-                if pred_val in {"0", "1"}:
+                if pred_val is not None and true_val is not None:
                     hits_after_treatment += 1
 
-                    true_int = int(true_val)
                     pred_int = int(pred_val)
+                    true_int = int(true_val)
 
                     f1_data[style]['true'].append(true_int)
                     f1_data[style]['pred'].append(pred_int)
@@ -169,19 +170,31 @@ class Evaluator():
                     "hamming_loss": None,
                 })
 
-        f1_binary = {
-            style: f1_score(y_true=data['true'], y_pred=data['pred'], average='binary')
-            for style, data in f1_data.items()
-            if data['true'] and data['pred']
-        }
+        f1_binary = {}
+        precision_binary = {}
+        recall_binary = {}
+        accuracy_binary = {}
+
+        for style, data in f1_data.items():
+            if data['true'] and data['pred']:
+                true_vals = data['true']
+                pred_vals = data['pred']
+
+                f1_binary[style] = f1_score(true_vals, pred_vals, average='binary', zero_division=0)
+                precision_binary[style] = precision_score(true_vals, pred_vals, average='binary', zero_division=0)
+                recall_binary[style] = recall_score(true_vals, pred_vals, average='binary', zero_division=0)
+                accuracy_binary[style] = accuracy_score(true_vals, pred_vals)
 
         comic_styles_evaluation = {
             'f1_score': f1_binary,
-            'f1_macro': f1_score(true_labels, pred_labels, average='macro') if true_labels else 0.0,
-            'f1_micro': f1_score(true_labels, pred_labels, average='micro') if true_labels else 0.0,
-            'hamming_loss': mean(hamming_loss_results) if hamming_loss_results else 0.0,
-            'hit_rate_pre_treatment': hits_original_format / total_predictions if total_predictions > 0 else 0.0,
-            'hit_rate': hits_after_treatment / total_predictions if total_predictions > 0 else 0.0,
+            'precision': precision_binary,
+            'recall': recall_binary,
+            'accuracy': accuracy_binary,
+            'f1_macro': f1_score(true_labels, pred_labels, average='macro', zero_division=0),
+            'f1_micro': f1_score(true_labels, pred_labels, average='micro', zero_division=0),
+            'hamming_loss': mean(hamming_loss_results),
+            'hit_rate_pre_treatment': hits_original_format / total_predictions,
+            'hit_rate': hits_after_treatment / total_predictions,
         }
 
         return comic_styles_evaluation, individual_metrics
@@ -236,6 +249,6 @@ class Evaluator():
             print(f'Step {model_name} - {video_url} completed')
             JSONSaver.save_json(processed_results, output_path)
 
-        texts_explanations_results = mean(agreement_level_results) if agreement_level_results else 0
+        texts_explanations_results = mean(agreement_level_results)
 
         return texts_explanations_results, individual_metrics

@@ -17,9 +17,22 @@ class StringUtils:
 
     @staticmethod
     def extract_binary_digit(value: str) -> str | None:
-        match = re.search(r'\b[01]\b', value.strip())
+        cleaned = str(value).strip()
+        if cleaned == "0":
+            return "0"
+        if cleaned == "1":
+            return "1"
+
+        # Captura dígitos "0" ou "1" que estejam sozinhos ou rodeados por ruído
+        match = re.search(r'\b(0|1)\b', cleaned)
         if match:
-            return match.group(0)
+            return match.group(1)
+
+        # Alternativa: procurar primeiro dígito 0 ou 1, ignorando não-dígitos
+        match = re.search(r'(?:^|\D)([01])(?:\D|$)', cleaned)
+        if match:
+            return match.group(1)
+
         return None
 
     @staticmethod

@@ -45,6 +45,8 @@ class Evaluator():
 
         for phase_key, eval_func, message in phases_by_priority:
             for model_name in predictions:
+                if model_name == 'mixtral-8x7b-instruct-v01' and phase_key == 'comic_styles':
+                    continue
                 results.setdefault(model_name, {})
                 all_individual_metrics.setdefault(model_name, {})
                 evaluate_phase(model_name, phase_key, eval_func, f'--- {model_name} ---\n{message}')

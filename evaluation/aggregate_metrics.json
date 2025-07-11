@@ -1,4 +1,13 @@
 {
+    "mixtral-8x7b-instruct-v01": {
+        "punchlines": {
+            "dice_similarity": 0.5436144598986802,
+            "jaccard_similarity": 0.41230202604209487,
+            "levenshtein_distance": 25.26736842105263,
+            "hit_rate_pre_treatment": 0.9894736842105263,
+            "hit_rate": 0.9894736842105263
+        }
+    },
     "granite-3-3-8b-instruct": {
         "punchlines": {
             "dice_similarity": 0.5282609896234128,

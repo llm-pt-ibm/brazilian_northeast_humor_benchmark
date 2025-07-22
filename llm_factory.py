@@ -2,6 +2,7 @@ from hugging_face_llm import HuggingFaceLLM
 from open_ai_llm import OpenAiLLM
 from gemini_llm import GeminiLLM
 from ibm_cloud_llm import IBMCloudLLM
+from ibm_cloud_custom_model import IBMCloudCustomModel
 
 class LLMFactory:
     @staticmethod
@@ -33,6 +34,13 @@ class LLMFactory:
                 api_key=config["api_key"],
                 service_url=config["service_url"],
                 project_id=config["project_id"]
+            )
+
+        elif provider == 'ibmcloudcustom':
+            return IBMCloudCustomModel(
+                model_name=config["model_name"],
+                api_key=config["api_key"],
+                deployment_url=config["deployment_url"]
             )
 
         else:

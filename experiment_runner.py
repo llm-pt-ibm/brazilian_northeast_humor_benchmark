@@ -31,7 +31,8 @@ class ExperimentRunner:
             self.execute_comic_styles_experiment(model)
 
     def execute_punchlines_experiment(self, model):
-        filename = os.path.join("predictions", model.model_name, 'punchlines_predictions.json')
+        model_name = model.model_name.lower()
+        filename = os.path.join("predictions", model_name, 'punchlines_predictions.json')
         predictions = self._load_existing_predictions(filename)
 
         for i, row in self.df.iterrows():
@@ -49,7 +50,7 @@ class ExperimentRunner:
                 break
 
             predictions[video_url] = {
-                "model_name": model.model_name,
+                "model_name": model_name,
                 "humorous_text": humorous_text,
                 "prompt": prompt,
                 "model_punchlines": model_output,
@@ -60,7 +61,8 @@ class ExperimentRunner:
             self.json_saver.save_json(predictions, filename)
 
     def execute_comic_styles_experiment(self, model):
-        filename = os.path.join("predictions", model.model_name, 'comic_styles_predictions.json')
+        model_name = model.model_name.lower()
+        filename = os.path.join("predictions", model_name, 'comic_styles_predictions.json')
         predictions = self._load_existing_predictions(filename)
 
         comic_styles = self.comic_styles_manager.get_comic_styles()
@@ -90,7 +92,7 @@ class ExperimentRunner:
                 break
 
             predictions[video_url] = {
-                "model_name": model.model_name,
+                "model_name": model_name,
                 "humorous_text": humorous_text,
                 "prompts": comic_styles_prompts,
                 "annotated_comic_styles": dict(row[comic_styles]),
@@ -101,7 +103,8 @@ class ExperimentRunner:
             self.json_saver.save_json(predictions, filename)
 
     def execute_explanations_experiment(self, model):
-        filename = os.path.join("predictions", model.model_name, 'texts_explanations_predictions.json')
+        model_name = model.model_name.lower()
+        filename = os.path.join("predictions", model_name, 'texts_explanations_predictions.json')
         predictions = self._load_existing_predictions(filename)
 
         for i, row in self.df.iterrows():
@@ -119,7 +122,7 @@ class ExperimentRunner:
                 break
 
             predictions[video_url] = {
-                "model_name": model.model_name,
+                "model_name": model_name,
                 "humorous_text": humorous_text,
                 "prompt": prompt,
                 "model_text_explanation": model_output,

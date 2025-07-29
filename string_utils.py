@@ -23,17 +23,23 @@ class StringUtils:
         if cleaned == "1":
             return "1"
 
-        # Captura dígitos "0" ou "1" que estejam sozinhos ou rodeados por ruído
         match = re.search(r'\b(0|1)\b', cleaned)
         if match:
             return match.group(1)
 
-        # Alternativa: procurar primeiro dígito 0 ou 1, ignorando não-dígitos
         match = re.search(r'(?:^|\D)([01])(?:\D|$)', cleaned)
         if match:
             return match.group(1)
 
         return None
+
+    @staticmethod
+    def remove_prompt_from_model_answer(prompt: str, model_answer: str):
+        cleaned_answer = model_answer
+        if prompt in model_answer:
+            cleaned_answer = cleaned_answer.replace(prompt, '')
+
+        return cleaned_answer
 
     @staticmethod
     def has_list_structure(text: str) -> bool:
@@ -55,15 +61,12 @@ class StringUtils:
 
     @staticmethod
     def is_valid_list_of_strings(text: str) -> bool:
-        # Primeiro: tem estrutura de lista?
         if not StringUtils.has_list_structure(text):
             return False
 
-        # Segundo: não pode ter erros de aspas
         if not StringUtils.has_no_quote_errors(text):
             return False
 
-        # Agora tenta avaliar o texto limpo
         try:
             val = ast.literal_eval(text)
             if isinstance(val, list) and all(isinstance(item, str) for item in val):

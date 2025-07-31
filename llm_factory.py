@@ -37,12 +37,5 @@ class LLMFactory:
                 project_id=config["project_id"]
             )
 
-        elif provider == 'ibmcloudcustom':
-            return IBMCloudCustomModel(
-                model_name=config["model_name"],
-                api_key=config["api_key"],
-                deployment_url=config["deployment_url"]
-            )
-
         else:
             raise ValueError(f"Provider '{provider}' not supported.")

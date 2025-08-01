@@ -10,11 +10,22 @@ class PowerNineModel:
         self.headers = {"Content-Type": "application/json", "x-api-key": api_key}
         payload = {"model_name": model_name, "hf_token": hf_token}
         requests.post(f"{url}/load_model", headers=self.headers, json=payload)
-        
+
     def generate(self, prompt: str) -> str:
-        payload = {"prompt": prompt, "model_name": self.model_id, "hf_token": self.hf_token}
+        payload = {"prompt": prompt,
+                   "model_name": self.model_id,
+                   "hf_token": self.hf_token,
+                   "parameters": {
+                        "temperature": 0.7,
+                        "max_new_tokens": 512,
+                        "top_p": 0.9,
+                        "stop_sequences": [], 
+                        "num_return_sequences": 1
+                    }}
         resp = requests.post(f"{self.url}/generate", headers=self.headers, json=payload)
         resp = json.loads(resp.content.decode())
+
+        return resp
 
     def unload_model(self):
         requests.post(f"{self.url}/unload_model", headers=self.headers)

@@ -60,7 +60,6 @@
             },
             "f1_macro": 0.13326279212382539,
             "f1_micro": 0.164804469273743,
-            "hamming_loss": 0.47210526315789475,
             "hit_rate_pre_treatment": 0.0,
             "hit_rate": 1.0
         },
@@ -117,7 +116,6 @@
             },
             "f1_macro": 0.5692054655178524,
             "f1_micro": 0.6263676148796499,
-            "hamming_loss": 0.35947368421052633,
             "hit_rate_pre_treatment": 1.0,
             "hit_rate": 1.0
         },
@@ -174,7 +172,6 @@
             },
             "f1_macro": 0.5741782121422172,
             "f1_micro": 0.6373142542652724,
-            "hamming_loss": 0.3468421052631579,
             "hit_rate_pre_treatment": 1.0,
             "hit_rate": 1.0
         },
@@ -231,10 +228,64 @@
             },
             "f1_macro": 0.6137819830001974,
             "f1_micro": 0.6760037348272643,
-            "hamming_loss": 0.36526315789473685,
             "hit_rate_pre_treatment": 0.0,
             "hit_rate": 1.0
         },
         "texts_explanations": 3.9726315789473685
+    },
+    "gemma-3-gaia-pt-br-4b-it": {
+        "punchlines": {
+            "dice_similarity": 0.48383326234057217,
+            "jaccard_similarity": 0.3574202323902476,
+            "levenshtein_distance": 28.490526315789474,
+            "hit_rate_pre_treatment": 0.0,
+            "hit_rate": 0.9936842105263158
+        },
+        "comic_styles": {
+            "f1_score": {
+                "fun": 0.867699642431466,
+                "humor": 0.8498789346246973,
+                "nonsense": 0.4627831715210356,
+                "wit": 0.8636363636363636,
+                "irony": 0.7074829931972789,
+                "satire": 0.2882882882882883,
+                "sarcasm": 0.5714285714285714,
+                "cynicism": 0.30357142857142855
+            },
+            "precision": {
+                "fun": 0.7663157894736842,
+                "humor": 0.7389473684210527,
+                "nonsense": 0.30105263157894735,
+                "wit": 0.76,
+                "irony": 0.5473684210526316,
+                "satire": 0.16842105263157894,
+                "sarcasm": 0.4,
+                "cynicism": 0.17894736842105263
+            },
+            "recall": {
+                "fun": 1.0,
+                "humor": 1.0,
+                "nonsense": 1.0,
+                "wit": 1.0,
+                "irony": 1.0,
+                "satire": 1.0,
+                "sarcasm": 1.0,
+                "cynicism": 1.0
+            },
+            "accuracy": {
+                "fun": 0.7663157894736842,
+                "humor": 0.7389473684210527,
+                "nonsense": 0.30105263157894735,
+                "wit": 0.76,
+                "irony": 0.5473684210526316,
+                "satire": 0.16842105263157894,
+                "sarcasm": 0.4,
+                "cynicism": 0.17894736842105263
+            },
+            "f1_macro": 0.6143461742123912,
+            "f1_micro": 0.6510472133475328,
+            "hit_rate_pre_treatment": 0.0,
+            "hit_rate": 1.0
+        }
     }
 }

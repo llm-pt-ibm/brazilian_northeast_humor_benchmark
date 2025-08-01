@@ -1,7 +1,7 @@
 from comic_styles_manager import ComicStylesManager
 from json_saver import JSONSaver
 from judge_model import JudgeModel
-from sklearn.metrics import f1_score, hamming_loss, precision_score, recall_score, accuracy_score
+from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
 from statistics import mean
 from string_utils import StringUtils
 from text_overlap_metrics import TextOverlapMetrics
@@ -69,11 +69,13 @@ class Evaluator():
             current_row = punchlines[video_url]
             annotated = current_row['annotated_punchlines']
             raw_model_output = current_row['model_punchlines']
+            prompt = current_row['prompt']
 
             if StringUtils.is_valid_list_of_strings(raw_model_output):
                 hits_original_format += 1
 
-            formatted_model_punchlines = StringUtils.extract_list_of_strings_from_text(raw_model_output)
+            cleaned_prediction = StringUtils.remove_prompt_from_model_answer(prompt=prompt, model_answer=raw_model_output)
+            formatted_model_punchlines = StringUtils.extract_list_of_strings_from_text(cleaned_prediction)
 
             if formatted_model_punchlines:
                 hits_after_treatment += 1
@@ -117,15 +119,17 @@ class Evaluator():
         style_keys = list(comic_styles)
 
         f1_data = {style: {'true': [], 'pred': []} for style in style_keys}
-        true_labels, pred_labels, hamming_loss_results, individual_metrics = [], [], [], []
+        true_labels, pred_labels = [], []
 
         total_predictions = 0
         hits_original_format = 0
         hits_after_treatment = 0
+        individual_metrics = []
 
         for video_url, current_row in comic_styles_predictions.items():
             annotated = current_row['annotated_comic_styles']
             predicted = current_row['model_comic_styles']
+            prompts = current_row['prompts']
 
             valid_annot_ones = []
             valid_pred_ones = []
@@ -133,11 +137,13 @@ class Evaluator():
             for style in style_keys:
                 raw_true_val = annotated.get(style)
                 raw_pred_val = predicted.get(style)
+                current_prompt = prompts.get(style)
                 total_predictions += 1
 
                 if raw_pred_val in {"0", "1"}:
                     hits_original_format += 1
 
+                pred_val = StringUtils.remove_prompt_from_model_answer(prompt = current_prompt, model_answer = raw_pred_val)
                 pred_val = StringUtils.extract_binary_digit(raw_pred_val)
                 true_val = StringUtils.extract_binary_digit(raw_true_val)
 
@@ -154,22 +160,17 @@ class Evaluator():
                     valid_pred_ones.append(pred_int)
 
             if valid_annot_ones:
-                hamming = hamming_loss(y_true=valid_annot_ones, y_pred=valid_pred_ones)
-                hamming_loss_results.append(hamming)
-
                 true_labels.append(valid_annot_ones)
                 pred_labels.append(valid_pred_ones)
 
                 individual_metrics.append({
                     "video_url": video_url,
                     **current_row,
-                    "hamming_loss": hamming,
                 })
             else:
                 individual_metrics.append({
                     "video_url": video_url,
                     **current_row,
-                    "hamming_loss": None,
                 })
 
         f1_binary = {}
@@ -194,7 +195,6 @@ class Evaluator():
             'accuracy': accuracy_binary,
             'f1_macro': f1_score(true_labels, pred_labels, average='macro', zero_division=0),
             'f1_micro': f1_score(true_labels, pred_labels, average='micro', zero_division=0),
-            'hamming_loss': mean(hamming_loss_results),
             'hit_rate_pre_treatment': hits_original_format / total_predictions,
             'hit_rate': hits_after_treatment / total_predictions,
         }
@@ -222,8 +222,11 @@ class Evaluator():
         individual_metrics = []
 
         for video_url, current_row in texts_explanations.items():
+            prompt = current_row['prompt']
+            
             if video_url in processed_results[model_name]:
                 result = processed_results[model_name][video_url]
+                result = StringUtils.remove_prompt_from_model_answer(prompt=prompt, model_answer=result)
                 agreement_level_results.append(int(result['judge_model_results']['nivel_concordancia']))
                 individual_metrics.append(result)
                 continue 

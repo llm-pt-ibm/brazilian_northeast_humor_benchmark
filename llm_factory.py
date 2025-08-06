@@ -1,7 +1,8 @@
-from hugging_face_llm import HuggingFaceLLM
-from open_ai_llm import OpenAiLLM
+from claude_llm import ClaudeLLM
 from gemini_llm import GeminiLLM
 from ibm_cloud_llm import IBMCloudLLM
+from hugging_face_llm import HuggingFaceLLM
+from open_ai_llm import OpenAiLLM
 from power_nine_llm import PowerNineModel
 
 class LLMFactory:
@@ -17,17 +18,23 @@ class LLMFactory:
                 token = config['token']
             )
 
-        elif provider == "openai":
+        elif provider in ("openai", "maritacaai"):
             return OpenAiLLM(
                 api_key=config["api_key"],
                 model_name=config.get("model_name"),
                 base_url=config.get("base_url", "https://api.openai.com/v1")
             )
 
-        elif provider == "gemini":
+        elif provider in ("google", "gemini"):
             return GeminiLLM(
                 api_key=config["api_key"],
                 model_name=config.get("model_name")
+            )
+
+        elif provider in ("anthropic", "claude"):
+            return ClaudeLLM(
+                api_key=config["api_key"],
+                model_name=config["model_name"]
             )
 
         elif provider == 'ibmcloud':

@@ -1,7 +1,9 @@
+from collections import Counter
 from comic_styles_manager import ComicStylesManager
 from json_saver import JSONSaver
 from judge_model import JudgeModel
 from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
+from sklearn.preprocessing import MultiLabelBinarizer
 from statistics import mean
 from string_utils import StringUtils
 from text_overlap_metrics import TextOverlapMetrics
@@ -45,8 +47,6 @@ class Evaluator():
 
         for phase_key, eval_func, message in phases_by_priority:
             for model_name in predictions:
-                if model_name == 'mixtral-8x7b-instruct-v01' and phase_key == 'comic_styles':
-                    continue
                 results.setdefault(model_name, {})
                 all_individual_metrics.setdefault(model_name, {})
                 evaluate_phase(model_name, phase_key, eval_func, f'--- {model_name} ---\n{message}')
@@ -57,7 +57,6 @@ class Evaluator():
             punchlines = json.load(f)
         
         dice_results = []
-        jaccard_results = []
         levenshtein_results = []
         individual_metrics = []
 
@@ -83,18 +82,15 @@ class Evaluator():
             predicted = '; '.join(formatted_model_punchlines)
 
             dice = TextOverlapMetrics.dice_similarity(predicted, annotated)
-            jaccard = TextOverlapMetrics.jaccard_similarity(predicted, annotated)
             levenshtein = TextOverlapMetrics.levenshtein_distance(predicted, annotated)
 
             dice_results.append(dice)
-            jaccard_results.append(jaccard)
             levenshtein_results.append(levenshtein)
 
             individual_metrics.append({
                 "video_url": video_url,
                 **current_row,
                 "dice_similarity": dice,
-                "jaccard_similarity": jaccard,
                 "levenshtein_distance": levenshtein,
                 "is_original_format_valid": StringUtils.is_valid_list_of_strings(raw_model_output),
                 "is_after_treatment_valid": bool(formatted_model_punchlines)
@@ -102,7 +98,6 @@ class Evaluator():
 
         punchlines_evaluation = {
             "dice_similarity": mean(dice_results),
-            "jaccard_similarity": mean(jaccard_results),
             "levenshtein_distance": mean(levenshtein_results),
             "hit_rate_pre_treatment": hits_original_format / total,
             "hit_rate": hits_after_treatment / total
@@ -119,11 +114,14 @@ class Evaluator():
         style_keys = list(comic_styles)
 
         f1_data = {style: {'true': [], 'pred': []} for style in style_keys}
-        true_labels, pred_labels = [], []
+        true_labels = []
+        pred_labels = []
 
         total_predictions = 0
         hits_original_format = 0
         hits_after_treatment = 0
+        invalid_predictions = 0
+        empty_response_counter = Counter()
         individual_metrics = []
 
         for video_url, current_row in comic_styles_predictions.items():
@@ -131,8 +129,8 @@ class Evaluator():
             predicted = current_row['model_comic_styles']
             prompts = current_row['prompts']
 
-            valid_annot_ones = []
-            valid_pred_ones = []
+            valid_true = []
+            valid_pred = []
 
             for style in style_keys:
                 raw_true_val = annotated.get(style)
@@ -143,7 +141,15 @@ class Evaluator():
                 if raw_pred_val in {"0", "1"}:
                     hits_original_format += 1
 
-                pred_val = StringUtils.remove_prompt_from_model_answer(prompt = current_prompt, model_answer = raw_pred_val)
+                if raw_pred_val is None or str(raw_pred_val).strip() == "":
+                    invalid_predictions += 1
+                    empty_response_counter[style] += 1
+                    continue
+                if raw_true_val is None or str(raw_true_val).strip() == "":
+                    invalid_predictions += 1
+                    continue
+
+                pred_val = StringUtils.remove_prompt_from_model_answer(prompt=current_prompt, model_answer=raw_pred_val)
                 pred_val = StringUtils.extract_binary_digit(raw_pred_val)
                 true_val = StringUtils.extract_binary_digit(raw_true_val)
 
@@ -156,22 +162,19 @@ class Evaluator():
                     f1_data[style]['true'].append(true_int)
                     f1_data[style]['pred'].append(pred_int)
 
-                    valid_annot_ones.append(true_int)
-                    valid_pred_ones.append(pred_int)
+                    valid_true.append(true_int)
+                    valid_pred.append(pred_int)
+                else:
+                    invalid_predictions += 1
 
-            if valid_annot_ones:
-                true_labels.append(valid_annot_ones)
-                pred_labels.append(valid_pred_ones)
+            if valid_true:
+                true_labels.append(valid_true)
+                pred_labels.append(valid_pred)
 
-                individual_metrics.append({
-                    "video_url": video_url,
-                    **current_row,
-                })
-            else:
-                individual_metrics.append({
-                    "video_url": video_url,
-                    **current_row,
-                })
+            individual_metrics.append({
+                "video_url": video_url,
+                **current_row,
+            })
 
         f1_binary = {}
         precision_binary = {}
@@ -188,15 +191,29 @@ class Evaluator():
                 recall_binary[style] = recall_score(true_vals, pred_vals, average='binary', zero_division=0)
                 accuracy_binary[style] = accuracy_score(true_vals, pred_vals)
 
+        if true_labels and pred_labels:
+            mlb = MultiLabelBinarizer(classes=list(range(len(style_keys))))
+            true_binary = mlb.fit_transform(true_labels)
+            pred_binary = mlb.transform(pred_labels)
+
+            f1_macro = f1_score(true_binary, pred_binary, average='macro', zero_division=0)
+            f1_micro = f1_score(true_binary, pred_binary, average='micro', zero_division=0)
+        else:
+            f1_macro = None
+            f1_micro = None
+
+        omission_rate = invalid_predictions / total_predictions if total_predictions > 0 else 0
+
         comic_styles_evaluation = {
             'f1_score': f1_binary,
             'precision': precision_binary,
             'recall': recall_binary,
             'accuracy': accuracy_binary,
-            'f1_macro': f1_score(true_labels, pred_labels, average='macro', zero_division=0),
-            'f1_micro': f1_score(true_labels, pred_labels, average='micro', zero_division=0),
-            'hit_rate_pre_treatment': hits_original_format / total_predictions,
-            'hit_rate': hits_after_treatment / total_predictions,
+            'f1_macro': f1_macro,
+            'f1_micro': f1_micro,
+            'hit_rate_pre_treatment': hits_original_format / total_predictions if total_predictions > 0 else 0,
+            'hit_rate': hits_after_treatment / total_predictions if total_predictions > 0 else 0,
+            'omission_rate': omission_rate
         }
 
         return comic_styles_evaluation, individual_metrics

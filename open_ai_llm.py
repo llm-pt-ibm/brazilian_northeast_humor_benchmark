@@ -1,8 +1,8 @@
 from openai import OpenAI
 
 class OpenAiLLM:
-    def __init__(self, api_key: str, model_name: str = "gpt-4"):
-        self.client = OpenAI(api_key=api_key)
+    def __init__(self, api_key: str, model_name: str, base_url: str = "https://api.openai.com/v1"):
+        self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.model_name = model_name
 
     def generate(self, prompt: str, **kwargs) -> str:

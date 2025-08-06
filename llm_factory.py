@@ -20,7 +20,8 @@ class LLMFactory:
         elif provider == "openai":
             return OpenAiLLM(
                 api_key=config["api_key"],
-                model_name=config.get("model_name")
+                model_name=config.get("model_name"),
+                base_url=config.get("base_url", "https://api.openai.com/v1")
             )
 
         elif provider == "gemini":

@@ -5,7 +5,7 @@ class ClaudeLLM:
         self.client = anthropic.Anthropic(api_key=api_key)
         self.model_name = model_name
 
-    def generate(self, prompt: str, **kwargs) -> str:
+    def generate(self, prompt: str) -> str:
         message = self.client.messages.create(
             model=self.model_name,
             messages=[
@@ -19,7 +19,7 @@ class ClaudeLLM:
                     ]
                 }
             ],
-            **kwargs
+            max_tokens = 512
         )
         
         return "\n".join(part.text for part in message.content if part.type == "text")

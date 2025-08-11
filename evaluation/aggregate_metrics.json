@@ -390,5 +390,21 @@
             "omission_rate": 0.0
         },
         "texts_explanations": 4.19620253164557
+    },
+    "claude-opus-4-1-20250805": {
+        "punchlines": {
+            "dice_similarity": 0.716951414205019,
+            "levenshtein_distance": 18.465437788018434,
+            "hit_rate_pre_treatment": 0.9976958525345622,
+            "hit_rate": 0.9976958525345622
+        }
+    },
+    "deepseek-chat-v3-0324:free": {
+        "punchlines": {
+            "dice_similarity": 0.7159466442785652,
+            "levenshtein_distance": 18.916666666666668,
+            "hit_rate_pre_treatment": 1.0,
+            "hit_rate": 1.0
+        }
     }
 }

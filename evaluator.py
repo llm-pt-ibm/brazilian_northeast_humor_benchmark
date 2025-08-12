@@ -249,7 +249,7 @@ class Evaluator():
         agreement_level_results = []
         individual_metrics = []
 
-        for video_url, current_row in texts_explanations.items():
+        for idx, (video_url, current_row) in enumerate(texts_explanations.items(), start = 0):
             prompt = current_row['prompt']
             
             if video_url in processed_results[model_name]:
@@ -280,7 +280,7 @@ class Evaluator():
             agreement_level_results.append(current_agreement_level)
             individual_metrics.append(current_result)
 
-            print(f'Step {model_name} - {video_url} completed')
+            print(f'Step {idx} - {model_name} completed.')
             JSONSaver.save_json(processed_results, output_path)
 
         texts_explanations_results = mean(agreement_level_results)

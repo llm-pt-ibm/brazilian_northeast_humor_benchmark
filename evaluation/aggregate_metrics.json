@@ -52,7 +52,8 @@
             "hit_rate_pre_treatment": 0.0,
             "hit_rate": 1.0,
             "omission_rate": 0.0
-        }
+        },
+        "texts_explanations": 3.391578947368421
     },
     "mixtral-8x7b-instruct-v01": {
         "punchlines": {
@@ -107,7 +108,8 @@
             "hit_rate_pre_treatment": 0.0,
             "hit_rate": 0.9828947368421053,
             "omission_rate": 0.017105263157894738
-        }
+        },
+        "texts_explanations": 3.3642105263157895
     },
     "sabia-3.1": {
         "punchlines": {
@@ -162,7 +164,8 @@
             "hit_rate_pre_treatment": 0.0,
             "hit_rate": 1.0,
             "omission_rate": 0.0
-        }
+        },
+        "texts_explanations": 4.1957894736842105
     },
     "granite-3-3-8b-instruct": {
         "punchlines": {
@@ -217,7 +220,8 @@
             "hit_rate_pre_treatment": 0.0,
             "hit_rate": 1.0,
             "omission_rate": 0.0
-        }
+        },
+        "texts_explanations": 3.642105263157895
     },
     "gemini-2.5-flash": {
         "punchlines": {
@@ -272,7 +276,8 @@
             "hit_rate_pre_treatment": 1.0,
             "hit_rate": 1.0,
             "omission_rate": 0.0
-        }
+        },
+        "texts_explanations": 4.635789473684211
     },
     "gpt-4": {
         "punchlines": {
@@ -327,7 +332,8 @@
             "hit_rate_pre_treatment": 1.0,
             "hit_rate": 1.0,
             "omission_rate": 0.0
-        }
+        },
+        "texts_explanations": 4.282105263157895
     },
     "llama-3-405b-instruct": {
         "punchlines": {
@@ -382,7 +388,8 @@
             "hit_rate_pre_treatment": 0.0,
             "hit_rate": 1.0,
             "omission_rate": 0.0
-        }
+        },
+        "texts_explanations": 3.9726315789473685
     },
     "deepseek-r1-0528-qwen3-8b": {
         "punchlines": {
@@ -437,6 +444,7 @@
             "hit_rate_pre_treatment": 0.0,
             "hit_rate": 1.0,
             "omission_rate": 0.0
-        }
+        },
+        "texts_explanations": 2.778481012658228
     }
 }

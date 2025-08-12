@@ -127,6 +127,7 @@ class Evaluator():
         for video_url, current_row in comic_styles_predictions.items():
             annotated = current_row['annotated_comic_styles']
             predicted = current_row['model_comic_styles']
+            humorous_text = current_row['humorous_text']
             prompts = current_row['prompts']
 
             valid_true = []
@@ -149,7 +150,10 @@ class Evaluator():
                     invalid_predictions += 1
                     continue
 
-                pred_val = StringUtils.remove_prompt_from_model_answer(prompt=current_prompt, model_answer=raw_pred_val)
+                pred_val = StringUtils.remove_prompt_from_model_answer(
+                    prompt=current_prompt,
+                    model_answer=raw_pred_val
+                )
                 pred_val = StringUtils.extract_binary_digit(raw_pred_val)
                 true_val = StringUtils.extract_binary_digit(raw_true_val)
 
@@ -164,17 +168,23 @@ class Evaluator():
 
                     valid_true.append(true_int)
                     valid_pred.append(pred_int)
+
+                    individual_metrics.append({
+                        "video_url": video_url,
+                        "comic_style": style,
+                        "prompt": current_prompt,
+                        "true_label": true_int,
+                        "pred_label": pred_int,
+                        "is_correct": int(pred_int == true_int),
+                        "humorous_text": humorous_text,
+                        "model_name": model_name
+                    })
                 else:
                     invalid_predictions += 1
 
             if valid_true:
                 true_labels.append(valid_true)
                 pred_labels.append(valid_pred)
-
-            individual_metrics.append({
-                "video_url": video_url,
-                **current_row,
-            })
 
         f1_binary = {}
         precision_binary = {}
@@ -218,6 +228,7 @@ class Evaluator():
 
         return comic_styles_evaluation, individual_metrics
 
+
     def evaluate_texts_explanations_predictions(self, model_name):
         input_path = os.path.join('predictions', model_name, 'texts_explanations_predictions.json')
         output_path = os.path.join('evaluation', 'texts_explanations_evaluation_results.json')
@@ -246,10 +257,11 @@ class Evaluator():
                 result = StringUtils.remove_prompt_from_model_answer(prompt=prompt, model_answer=result)
                 agreement_level_results.append(int(result['judge_model_results']['nivel_concordancia']))
                 individual_metrics.append(result)
-                continue 
+                continue
 
             annotated = current_row['annotated_text_explanation']
             predicted = current_row['model_text_explanation']
+            predicted = StringUtils.remove_prompt_from_model_answer(prompt=prompt, model_answer=predicted)
 
             try:
                 agreement_level_response_json = json.loads(judge_model.get_agreement_level(annotated_text=annotated, model_text=predicted))

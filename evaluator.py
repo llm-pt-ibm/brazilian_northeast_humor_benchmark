@@ -25,12 +25,12 @@ class Evaluator():
             JSONSaver.save_json(all_individual_metrics, individual_path)
 
         def evaluate_phase(model_name, phase_key, eval_func, message):
-            if not (phase_key == 'texts_explanations' and phase_key in results[model_name]):
-                print(message)
-                agg, ind = eval_func(model_name)
-                results[model_name][phase_key] = agg
-                all_individual_metrics[model_name][phase_key] = ind
-                save()
+            # Agora sempre chamamos o eval_func
+            print(f'--- {model_name} ---\n{message}')
+            agg, ind = eval_func(model_name)
+            results[model_name][phase_key] = agg
+            all_individual_metrics[model_name][phase_key] = ind
+            save()
 
         aggregate_path = os.path.join('evaluation', 'aggregate_metrics.json')
         individual_path = os.path.join('evaluation', 'individual_metrics.json')
@@ -40,8 +40,8 @@ class Evaluator():
         all_individual_metrics = load_json(individual_path)
 
         phases_by_priority = [
-            ("punchlines", self.evaluate_punchlines_predictions, "--- Text Overlap Metrics phase ---"),
-            ("comic_styles", self.evaluate_comic_styles_predictions, "--- Comic Styles Classification Metrics phase ---"),
+            #("punchlines", self.evaluate_punchlines_predictions, "--- Text Overlap Metrics phase ---"),
+            #("comic_styles", self.evaluate_comic_styles_predictions, "--- Comic Styles Classification Metrics phase ---"),
             ("texts_explanations", self.evaluate_texts_explanations_predictions, "--- Texts Explanations Agreement Metrics phase ---"),
         ]
 
@@ -49,7 +49,9 @@ class Evaluator():
             for model_name in predictions:
                 results.setdefault(model_name, {})
                 all_individual_metrics.setdefault(model_name, {})
-                evaluate_phase(model_name, phase_key, eval_func, f'--- {model_name} ---\n{message}')
+                evaluate_phase(model_name, phase_key, eval_func, message)
+
+        print(predictions)
 
     def evaluate_punchlines_predictions(self, model_name):
         file_path = os.path.join('predictions', model_name, 'punchlines_predictions.json')
@@ -236,6 +238,7 @@ class Evaluator():
         with open(input_path, 'r', encoding='utf-8') as f:
             texts_explanations = json.load(f)
 
+        # Carrega todos os resultados de julgamentos (de todos os modelos)
         if os.path.exists(output_path):
             with open(output_path, 'r', encoding='utf-8') as f:
                 processed_results = json.load(f)
@@ -249,9 +252,10 @@ class Evaluator():
         agreement_level_results = []
         individual_metrics = []
 
-        for idx, (video_url, current_row) in enumerate(texts_explanations.items(), start = 0):
+        for idx, (video_url, current_row) in enumerate(texts_explanations.items()):
             prompt = current_row['prompt']
-            
+
+            # Se já foi avaliado antes → só reutiliza
             if video_url in processed_results[model_name]:
                 result = processed_results[model_name][video_url]
                 result = StringUtils.remove_prompt_from_model_answer(prompt=prompt, model_answer=result)
@@ -259,12 +263,18 @@ class Evaluator():
                 individual_metrics.append(result)
                 continue
 
+            # Caso novo → roda modelo juiz
             annotated = current_row['annotated_text_explanation']
             predicted = current_row['model_text_explanation']
             predicted = StringUtils.remove_prompt_from_model_answer(prompt=prompt, model_answer=predicted)
 
             try:
-                agreement_level_response_json = json.loads(judge_model.get_agreement_level(annotated_text=annotated, model_text=predicted))
+                agreement_level_response_json = json.loads(
+                    judge_model.get_agreement_level(
+                        annotated_text=annotated,
+                        model_text=predicted
+                    )
+                )
                 current_agreement_level = int(agreement_level_response_json['nivel_concordancia'])
             except Exception as e:
                 print(f"[Erro] Falha ao avaliar {video_url}: {e}")
@@ -283,6 +293,5 @@ class Evaluator():
             print(f'Step {idx} - {model_name} completed.')
             JSONSaver.save_json(processed_results, output_path)
 
-        texts_explanations_results = mean(agreement_level_results)
-
+        texts_explanations_results = mean(agreement_level_results) if agreement_level_results else None
         return texts_explanations_results, individual_metrics

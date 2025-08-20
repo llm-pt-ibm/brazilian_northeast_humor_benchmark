@@ -22,10 +22,14 @@ class PowerNineModel:
                         "stop_sequences": [], 
                         "num_return_sequences": 1
                     }}
+        
         resp = requests.post(f"{self.url}/generate", headers=self.headers, json=payload)
-        resp = json.loads(resp.content.decode())
+        resp = resp.json()
 
-        return resp
+        if "completions" in resp and len(resp["completions"]) > 0:
+            return resp["completions"][0]["text"]
+        else:
+            return ""
 
     def unload_model(self):
         requests.post(f"{self.url}/unload_model", headers=self.headers)

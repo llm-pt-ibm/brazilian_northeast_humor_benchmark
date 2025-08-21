@@ -1,8 +1,10 @@
 from comic_styles_manager import ComicStylesManager
+from examples_entries_manager import ExamplesEntriesManager
 
 class LLMPromptManager:
     def __init__(self):
         self.comic_styles_manager = ComicStylesManager()
+        self.examples_manager = ExamplesEntriesManager()
 
     def get_punchlines_prompt(self, humorous_text, include_examples = False):
         punchlines_prompt = f'''Dado o seguinte texto humorístico, identifique todas as punchlines presentes.
@@ -16,7 +18,7 @@ Forneça a resposta no seguinte formato de lista:
 "...outras punchlines, se existirem..."]
 Texto humorístico: {humorous_text}
 Responda apenas no formato de lista.'''
-        
+
         return punchlines_prompt
 
     def get_comic_styles_prompts(self, humorous_text, include_examples = False):
@@ -34,6 +36,13 @@ Não inclua explicações ou qualquer outro texto além do número.'''
     
     def get_text_explanation_prompt(self, humorous_text, include_examples = False):
         text_explanation_prompt = f'''Explique o motivo do humor presente no seguinte texto. Aponte os elementos que contribuem para seu efeito cômico.
+
+{"Exemplos:\n\n" + "\n\n".join([
+        f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['explanation']}"
+        for i, ex in enumerate(self.examples_manager.get_random_explanations_entries_examples(text = humorous_text))
+    ]
+) if include_examples else ''}
+        
 Texto humorístico: {humorous_text}
 Responda apenas com a explicação, sem detalhes adicionais.'''
 

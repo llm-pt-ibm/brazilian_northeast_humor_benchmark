@@ -14,7 +14,6 @@ class ExamplesEntriesManager():
 
     def get_random_punchlines_entries_examples(self, text: str, count: int = 2):
         filtered_df = self.dataset[self.dataset['corrected_transcription'] != text.strip()]
-        print(len(filtered_df))
         sample = filtered_df.sample(count)[["corrected_transcription", "punchlines"]]
         examples_list = [
             {"humorous_text": row.corrected_transcription, "punchlines": f'[{row.punchlines.replace(';', ',').strip()}]'}
@@ -25,7 +24,6 @@ class ExamplesEntriesManager():
     
     def get_random_explanations_entries_examples(self, text: str, count: int = 2):
         filtered_df = self.dataset[self.dataset['corrected_transcription'] != text.strip()]
-        print(len(filtered_df))
         sample = filtered_df.sample(count)[["corrected_transcription", "joke_explanation"]]
         examples_list = [
             {"humorous_text": row.corrected_transcription, "explanation": row.joke_explanation}

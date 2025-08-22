@@ -12,12 +12,14 @@ Definição de punchline: A punchline é a parte de uma piada que provoca o efei
 Identifique apenas as partes que representam a resolução cômica (punchlines).
 Cada punchline deve ser registrada como um item em uma lista.
 Não adicione explicações ou trechos irrelevantes.
-Forneça a resposta no seguinte formato de lista:
-["Primeira punchline identificada",
-"Segunda punchline identificada",
-"...outras punchlines, se existirem..."]
+{'\nForneça a resposta no seguinte formato de lista:\n["Primeira punchline identificada",\n "Segunda punchline identificada",\n "...outras punchlines, se existirem..."]\n' if not include_examples else ''}
 Texto humorístico: {humorous_text}
-Responda apenas no formato de lista.'''
+
+{"Aqui estão alguns exemplos de entrada e saída:\n\n" + "\n\n".join([
+        f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['punchlines']}"
+        for i, ex in enumerate(self.examples_manager.get_random_punchlines_entries_examples(text = humorous_text))
+    ]
+)+"\n\nInstruções finais: " if include_examples else ''}Responda apenas no formato de lista.'''
 
         return punchlines_prompt
 
@@ -28,7 +30,12 @@ Responda apenas no formato de lista.'''
 Definição de {self.comic_styles_manager.get_comic_style_pt_br_translation(comic_style)}: {style_definition}
 Responda com 1 se sim, ou 0 se não.
 Texto humorístico: {humorous_text}
-Não inclua explicações ou qualquer outro texto além do número.'''
+
+{"Aqui estão alguns exemplos de entrada e saída:\n\n" + "\n\n".join([
+        f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['comic_style']}"
+        for i, ex in enumerate(self.examples_manager.get_random_comic_styles_entries_examples(text = humorous_text, comic_style=comic_style))
+    ]
+)+"\n\nInstruções finais: " if include_examples else ''}Não inclua explicações ou qualquer outro texto além do número.'''
         for comic_style, style_definition in styles_definitions.items()
         }
 
@@ -37,14 +44,13 @@ Não inclua explicações ou qualquer outro texto além do número.'''
     def get_text_explanation_prompt(self, humorous_text, include_examples = False):
         text_explanation_prompt = f'''Explique o motivo do humor presente no seguinte texto. Aponte os elementos que contribuem para seu efeito cômico.
 
-{"Exemplos:\n\n" + "\n\n".join([
+Texto humorístico: {humorous_text}
+
+{"Aqui estão alguns exemplos de entrada e saída:\n\n" + "\n\n".join([
         f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['explanation']}"
         for i, ex in enumerate(self.examples_manager.get_random_explanations_entries_examples(text = humorous_text))
     ]
-) if include_examples else ''}
-        
-Texto humorístico: {humorous_text}
-Responda apenas com a explicação, sem detalhes adicionais.'''
+)+"\n\nInstruções finais: " if include_examples else ''}Responda apenas com a explicação, sem detalhes adicionais.'''
 
         return text_explanation_prompt
 

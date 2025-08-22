@@ -17,7 +17,7 @@ class ExamplesEntriesManager():
         print(len(filtered_df))
         sample = filtered_df.sample(count)[["corrected_transcription", "punchlines"]]
         examples_list = [
-            {"humorous_text": row.corrected_transcription, "punchlines": f'[{row.punchlines.replace(';', ',')}]'}
+            {"humorous_text": row.corrected_transcription, "punchlines": f'[{row.punchlines.replace(';', ',').strip()}]'}
             for row in sample.itertuples(index=False)
         ]
 

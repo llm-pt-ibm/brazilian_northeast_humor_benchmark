@@ -19,21 +19,23 @@ class ExperimentRunner:
         self.models_loader = ModelsLoader()
         self.json_saver = JSONSaver()
 
-    def execute(self):
+    def execute(self, prompting_strategy: str = 'zero-shot'):
         models = self.models_loader.load_models_from_config_file()
         for model in models:
             print(f'--- {model.model_name} ---')
             print('--- Punchlines phase ---')
-            self.execute_punchlines_experiment(model)
+            self.execute_punchlines_experiment(model, prompting_strategy=prompting_strategy)
             print('--- Texts Explanations phase ---')
-            self.execute_explanations_experiment(model)
+            self.execute_explanations_experiment(model, prompting_strategy=prompting_strategy)
             print('--- Comic Styles phase ---')
-            self.execute_comic_styles_experiment(model)
+            self.execute_comic_styles_experiment(model, prompting_strategy=prompting_strategy)
 
-    def execute_punchlines_experiment(self, model):
+    def execute_punchlines_experiment(self, model, prompting_strategy: str = 'zero-shot'):
         model_name = model.model_name.lower()
-        filename = os.path.join("predictions", model_name, 'punchlines_predictions.json')
+        filename = os.path.join("predictions", prompting_strategy, model_name, 'punchlines_predictions.json')
         predictions = self._load_existing_predictions(filename)
+        include_examples = False if prompting_strategy == 'zero-shot' else True
+        print(f'--- {prompting_strategy.capitalize()} scenario ---')
 
         for i, row in self.df.iterrows():
             video_url = row["video_url"]
@@ -41,7 +43,7 @@ class ExperimentRunner:
                 continue
 
             humorous_text = row["corrected_transcription"]
-            prompt = self.llm_prompt_manager.get_punchlines_prompt(humorous_text)
+            prompt = self.llm_prompt_manager.get_punchlines_prompt(humorous_text, include_examples = include_examples)
             
             try:
                 model_output = self._safe_generate(model, prompt)
@@ -60,13 +62,14 @@ class ExperimentRunner:
             print(f'Step {i + 1} completed.')
             self.json_saver.save_json(predictions, filename)
 
-    def execute_comic_styles_experiment(self, model):
+    def execute_comic_styles_experiment(self, model, prompting_strategy: str = 'zero-shot'):
         model_name = model.model_name.lower()
         filename = os.path.join("predictions", model_name, 'comic_styles_predictions.json')
         predictions = self._load_existing_predictions(filename)
+        include_examples = False if prompting_strategy == 'zero-shot' else True
+        print(f'--- {prompting_strategy.capitalize()} scenario ---')
 
         comic_styles = self.comic_styles_manager.get_comic_styles()
-
         for i, row in self.df.iterrows():
             video_url = row["video_url"]
             if video_url in predictions:
@@ -75,7 +78,7 @@ class ExperimentRunner:
                         continue
 
             humorous_text = row["corrected_transcription"]
-            comic_styles_prompts = self.llm_prompt_manager.get_comic_styles_prompts(humorous_text)
+            comic_styles_prompts = self.llm_prompt_manager.get_comic_styles_prompts(humorous_text, include_examples = include_examples)
 
             model_outputs = {}
             need_to_break = False
@@ -102,10 +105,12 @@ class ExperimentRunner:
             print(f'Step {i + 1} completed.')
             self.json_saver.save_json(predictions, filename)
 
-    def execute_explanations_experiment(self, model):
+    def execute_explanations_experiment(self, model, prompting_strategy: str = 'zero-shot'):
         model_name = model.model_name.lower()
-        filename = os.path.join("predictions", model_name, 'texts_explanations_predictions.json')
+        filename = os.path.join("predictions", prompting_strategy, model_name, 'texts_explanations_predictions.json')
         predictions = self._load_existing_predictions(filename)
+        include_examples = False if prompting_strategy == 'zero-shot' else True
+        print(f'--- {prompting_strategy.capitalize()} scenario ---')
 
         for i, row in self.df.iterrows():
             video_url = row["video_url"]
@@ -113,7 +118,7 @@ class ExperimentRunner:
                 continue
 
             humorous_text = row["corrected_transcription"]
-            prompt = self.llm_prompt_manager.get_text_explanation_prompt(humorous_text)
+            prompt = self.llm_prompt_manager.get_text_explanation_prompt(humorous_text, include_examples = include_examples)
 
             try:
                 model_output = self._safe_generate(model, prompt)

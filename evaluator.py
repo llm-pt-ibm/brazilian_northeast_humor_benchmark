@@ -25,7 +25,6 @@ class Evaluator():
             JSONSaver.save_json(all_individual_metrics, individual_path)
 
         def evaluate_phase(model_name, phase_key, eval_func, message):
-            # Agora sempre chamamos o eval_func
             print(f'--- {model_name} ---\n{message}')
             agg, ind = eval_func(model_name)
             results[model_name][phase_key] = agg
@@ -40,8 +39,8 @@ class Evaluator():
         all_individual_metrics = load_json(individual_path)
 
         phases_by_priority = [
-            #("punchlines", self.evaluate_punchlines_predictions, "--- Text Overlap Metrics phase ---"),
-            #("comic_styles", self.evaluate_comic_styles_predictions, "--- Comic Styles Classification Metrics phase ---"),
+            ("punchlines", self.evaluate_punchlines_predictions, "--- Text Overlap Metrics phase ---"),
+            ("comic_styles", self.evaluate_comic_styles_predictions, "--- Comic Styles Classification Metrics phase ---"),
             ("texts_explanations", self.evaluate_texts_explanations_predictions, "--- Texts Explanations Agreement Metrics phase ---"),
         ]
 
@@ -238,7 +237,6 @@ class Evaluator():
         with open(input_path, 'r', encoding='utf-8') as f:
             texts_explanations = json.load(f)
 
-        # Carrega todos os resultados de julgamentos (de todos os modelos)
         if os.path.exists(output_path):
             with open(output_path, 'r', encoding='utf-8') as f:
                 processed_results = json.load(f)
@@ -255,7 +253,6 @@ class Evaluator():
         for idx, (video_url, current_row) in enumerate(texts_explanations.items()):
             prompt = current_row['prompt']
 
-            # Se já foi avaliado antes → só reutiliza
             if video_url in processed_results[model_name]:
                 result = processed_results[model_name][video_url]
                 result = StringUtils.remove_prompt_from_model_answer(prompt=prompt, model_answer=result)
@@ -263,7 +260,6 @@ class Evaluator():
                 individual_metrics.append(result)
                 continue
 
-            # Caso novo → roda modelo juiz
             annotated = current_row['annotated_text_explanation']
             predicted = current_row['model_text_explanation']
             predicted = StringUtils.remove_prompt_from_model_answer(prompt=prompt, model_answer=predicted)

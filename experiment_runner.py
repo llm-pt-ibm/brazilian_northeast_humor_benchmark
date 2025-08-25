@@ -33,6 +33,7 @@ class ExperimentRunner:
     def execute_punchlines_experiment(self, model, prompting_strategy: str = 'zero-shot'):
         model_name = model.model_name.lower()
         filename = os.path.join("predictions", prompting_strategy, model_name, 'punchlines_predictions.json')
+        #filename = os.path.join("predictions", model_name, 'punchlines_predictions.json')
         predictions = self._load_existing_predictions(filename)
         include_examples = False if prompting_strategy == 'zero-shot' else True
         print(f'--- {prompting_strategy.capitalize()} scenario ---')
@@ -64,7 +65,8 @@ class ExperimentRunner:
 
     def execute_comic_styles_experiment(self, model, prompting_strategy: str = 'zero-shot'):
         model_name = model.model_name.lower()
-        filename = os.path.join("predictions", model_name, 'comic_styles_predictions.json')
+        filename = os.path.join("predictions", prompting_strategy, model_name, 'comic_styles_predictions.json')
+        #filename = os.path.join("predictions", model_name, 'comic_styles_predictions.json')
         predictions = self._load_existing_predictions(filename)
         include_examples = False if prompting_strategy == 'zero-shot' else True
         print(f'--- {prompting_strategy.capitalize()} scenario ---')
@@ -108,6 +110,7 @@ class ExperimentRunner:
     def execute_explanations_experiment(self, model, prompting_strategy: str = 'zero-shot'):
         model_name = model.model_name.lower()
         filename = os.path.join("predictions", prompting_strategy, model_name, 'texts_explanations_predictions.json')
+        #filename = os.path.join("predictions", model_name, 'texts_explanations_predictions.json')
         predictions = self._load_existing_predictions(filename)
         include_examples = False if prompting_strategy == 'zero-shot' else True
         print(f'--- {prompting_strategy.capitalize()} scenario ---')

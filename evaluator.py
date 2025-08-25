@@ -16,7 +16,18 @@ class Evaluator():
     def __init__(self):
         pass
 
-    def evaluate_models_predictions(self):
+    def evaluate_all_scenarios(self):
+        predictions_root = './predictions'
+        scenarios = [
+            d for d in os.listdir(predictions_root)
+            if os.path.isdir(os.path.join(predictions_root, d))
+        ]
+
+        for scenario in scenarios:
+            print(f"\n=== Avaliando cenário: {scenario} ===")
+            self.evaluate_models_predictions(scenario)
+
+    def evaluate_models_predictions(self, scenario_name):
         def load_json(path):
             return json.load(open(path, 'r', encoding='utf-8')) if os.path.exists(path) else {}
 
@@ -26,14 +37,19 @@ class Evaluator():
 
         def evaluate_phase(model_name, phase_key, eval_func, message):
             print(f'--- {model_name} ---\n{message}')
-            agg, ind = eval_func(model_name)
+            agg, ind = eval_func(model_name, scenario_name)
             results[model_name][phase_key] = agg
             all_individual_metrics[model_name][phase_key] = ind
             save()
 
-        aggregate_path = os.path.join('evaluation', 'aggregate_metrics.json')
-        individual_path = os.path.join('evaluation', 'individual_metrics.json')
-        predictions = os.listdir('./predictions')
+        scenario_predictions = os.path.join('predictions', scenario_name)
+        scenario_evaluation = os.path.join('evaluation', scenario_name)
+        os.makedirs(scenario_evaluation, exist_ok=True)
+
+        aggregate_path = os.path.join(scenario_evaluation, 'aggregate_metrics.json')
+        individual_path = os.path.join(scenario_evaluation, 'individual_metrics.json')
+
+        models = os.listdir(scenario_predictions)
 
         results = load_json(aggregate_path)
         all_individual_metrics = load_json(individual_path)
@@ -45,15 +61,13 @@ class Evaluator():
         ]
 
         for phase_key, eval_func, message in phases_by_priority:
-            for model_name in predictions:
+            for model_name in models:
                 results.setdefault(model_name, {})
                 all_individual_metrics.setdefault(model_name, {})
                 evaluate_phase(model_name, phase_key, eval_func, message)
 
-        print(predictions)
-
-    def evaluate_punchlines_predictions(self, model_name):
-        file_path = os.path.join('predictions', model_name, 'punchlines_predictions.json')
+    def evaluate_punchlines_predictions(self, model_name, scenario_name):
+        file_path = os.path.join('predictions', scenario_name, model_name, 'punchlines_predictions.json')
         with open(file_path, 'r', encoding='utf-8') as f:
             punchlines = json.load(f)
         
@@ -106,8 +120,8 @@ class Evaluator():
 
         return punchlines_evaluation, individual_metrics
 
-    def evaluate_comic_styles_predictions(self, model_name):
-        file_path = os.path.join('predictions', model_name, 'comic_styles_predictions.json')
+    def evaluate_comic_styles_predictions(self, model_name, scenario_name):
+        file_path = os.path.join('predictions', scenario_name, model_name, 'comic_styles_predictions.json')
         with open(file_path, 'r', encoding='utf-8') as f:
             comic_styles_predictions = json.load(f)
 
@@ -229,10 +243,9 @@ class Evaluator():
 
         return comic_styles_evaluation, individual_metrics
 
-
-    def evaluate_texts_explanations_predictions(self, model_name):
-        input_path = os.path.join('predictions', model_name, 'texts_explanations_predictions.json')
-        output_path = os.path.join('evaluation', 'texts_explanations_evaluation_results.json')
+    def evaluate_texts_explanations_predictions(self, model_name, scenario_name):
+        input_path = os.path.join('predictions', scenario_name, model_name, 'texts_explanations_predictions.json')
+        output_path = os.path.join('evaluation', scenario_name, 'texts_explanations_evaluation_results.json')
 
         with open(input_path, 'r', encoding='utf-8') as f:
             texts_explanations = json.load(f)

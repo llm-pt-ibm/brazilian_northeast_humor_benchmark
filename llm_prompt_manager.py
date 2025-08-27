@@ -35,7 +35,7 @@ Texto humorístico: {humorous_text}
     ]
 )}
 
-Instrução final: responda apenas no formato de lista.'''
+Instruções finais: responda exclusivamente com uma lista contendo as punchlines do texto acima. Não adicione explicações, nem texto fora da lista.'''
             
         return punchlines_prompt
 

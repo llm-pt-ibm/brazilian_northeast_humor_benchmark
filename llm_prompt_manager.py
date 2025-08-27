@@ -33,7 +33,7 @@ Texto humorístico: {humorous_text}
         f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['punchlines']}"
         for i, ex in enumerate(self.examples_manager.get_random_punchlines_entries_examples(text = humorous_text))
     ]
-)+"\n\n"}
+)}
 
 Instrução final: responda apenas no formato de lista.'''
             
@@ -65,7 +65,7 @@ Texto humorístico: {humorous_text}
         f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['comic_style']}"
         for i, ex in enumerate(self.examples_manager.get_random_comic_styles_entries_examples(text = humorous_text, comic_style=comic_style))
     ]
-)+"\n\n"}
+)}
 
 Instrução final: não inclua explicações ou qualquer outro texto além do número.'''
         for comic_style, style_definition in styles_definitions.items()
@@ -90,7 +90,7 @@ Texto humorístico: {humorous_text}
         f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['explanation']}"
         for i, ex in enumerate(self.examples_manager.get_random_explanations_entries_examples(text = humorous_text))
     ]
-)+"\n\n"}
+)}
 
 Instrução final: responda apenas com a explicação, sem detalhes adicionais.'''
 

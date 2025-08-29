@@ -27,7 +27,10 @@ Identifique apenas as partes que representam a resolução cômica (punchlines).
 Cada punchline deve ser registrada como um item em uma lista.
 Não adicione explicações ou trechos irrelevantes.
 
-Texto humorístico: {humorous_text}
+Forneça a resposta no seguinte formato de lista:
+["Primeira punchline identificada",
+"Segunda punchline identificada",
+"...outras punchlines, se existirem..."]
 
 {"Aqui estão alguns exemplos de entrada e saída:\n\n" + "\n\n".join([
         f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['punchlines']}"
@@ -35,8 +38,12 @@ Texto humorístico: {humorous_text}
     ]
 )}
 
-Instruções finais: responda exclusivamente com uma lista contendo as punchlines do texto acima. Não adicione explicações, nem texto fora da lista.'''
-            
+Agora analise o seguinte caso:
+
+Texto humorístico: {humorous_text}
+
+Saída:'''
+
         return punchlines_prompt
 
 
@@ -58,8 +65,7 @@ Não inclua explicações ou qualquer outro texto além do número.'''
             comic_style:f'''Dado o seguinte texto humorístico, avalie se ele contém o estilo cômico ”{self.comic_styles_manager.get_comic_style_pt_br_translation(comic_style)}”.
 Definição de {self.comic_styles_manager.get_comic_style_pt_br_translation(comic_style)}: {style_definition}
 Responda com 1 se sim, ou 0 se não.
-
-Texto humorístico: {humorous_text}
+Não inclua explicações ou qualquer outro texto além do número.
 
 {"Aqui estão alguns exemplos de entrada e saída:\n\n" + "\n\n".join([
         f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['comic_style']}"
@@ -67,7 +73,11 @@ Texto humorístico: {humorous_text}
     ]
 )}
 
-Instrução final: não inclua explicações ou qualquer outro texto além do número.'''
+Agora analise o seguinte caso:
+
+Texto humorístico: {humorous_text}
+
+Saída:'''
         for comic_style, style_definition in styles_definitions.items()
         }
 
@@ -82,9 +92,8 @@ Texto humorístico: {humorous_text}
 Responda apenas com a explicação, sem detalhes adicionais.'''
 
         else:
-            text_explanation_prompt = f'''Explique o motivo do humor presente no seguinte texto. Aponte os elementos que contribuem para seu efeito cômico.
-
-Texto humorístico: {humorous_text}
+            text_explanation_prompt = f'''Explique o motivo do humor presente no seguinte texto humorístico. Aponte os elementos que contribuem para seu efeito cômico.
+Responda apenas com a explicação, sem detalhes adicionais.
 
 {"Aqui estão alguns exemplos de entrada e saída:\n\n" + "\n\n".join([
         f"Entrada {i+1}: {ex['humorous_text']}\nSaída {i+1}: {ex['explanation']}"
@@ -92,7 +101,11 @@ Texto humorístico: {humorous_text}
     ]
 )}
 
-Instrução final: responda apenas com a explicação, sem detalhes adicionais.'''
+Agora analise o seguinte caso:
+
+Texto humorístico: {humorous_text}
+
+Saída:'''
 
         return text_explanation_prompt
 

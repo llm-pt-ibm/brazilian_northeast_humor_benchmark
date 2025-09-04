@@ -85,35 +85,53 @@ class Evaluator():
             raw_model_output = current_row['model_punchlines']
             prompt = current_row['prompt']
 
-            if StringUtils.is_valid_list_of_strings(raw_model_output):
+            is_original_valid = StringUtils.is_valid_list_of_strings(raw_model_output)
+            if is_original_valid:
                 hits_original_format += 1
 
-            cleaned_prediction = StringUtils.remove_prompt_from_model_answer(prompt=prompt, model_answer=raw_model_output)
+            cleaned_prediction = StringUtils.remove_prompt_from_model_answer(
+                prompt=prompt,
+                model_answer=raw_model_output
+            )
             formatted_model_punchlines = StringUtils.extract_list_of_strings_from_text(cleaned_prediction)
+            is_after_treatment_valid = bool(formatted_model_punchlines)
 
-            if formatted_model_punchlines:
+            if is_after_treatment_valid:
                 hits_after_treatment += 1
 
             predicted = '; '.join(formatted_model_punchlines)
 
-            dice = TextOverlapMetrics.dice_similarity(predicted, annotated)
-            levenshtein = TextOverlapMetrics.levenshtein_distance(predicted, annotated)
-
-            dice_results.append(dice)
-            levenshtein_results.append(levenshtein)
+            if is_after_treatment_valid:
+                dice = TextOverlapMetrics.dice_similarity(predicted, annotated)
+                levenshtein = TextOverlapMetrics.levenshtein_distance(predicted, annotated)
+                dice_results.append(dice)
+                levenshtein_results.append(levenshtein)
+            else:
+                dice = None
+                levenshtein = None
 
             individual_metrics.append({
                 "video_url": video_url,
                 **current_row,
+                "raw_model_output": raw_model_output,
+                "cleaned_prediction": cleaned_prediction, 
+                "formatted_model_punchlines": formatted_model_punchlines, 
                 "dice_similarity": dice,
                 "levenshtein_distance": levenshtein,
-                "is_original_format_valid": StringUtils.is_valid_list_of_strings(raw_model_output),
-                "is_after_treatment_valid": bool(formatted_model_punchlines)
+                "is_original_format_valid": is_original_valid,
+                "is_after_treatment_valid": is_after_treatment_valid
             })
 
+        if dice_results:
+            avg_dice = mean(dice_results)
+            avg_lev = mean(levenshtein_results)
+        else:
+            avg_dice = None
+            avg_lev = None
+
         punchlines_evaluation = {
-            "dice_similarity": mean(dice_results),
-            "levenshtein_distance": mean(levenshtein_results),
+            "dice_similarity": avg_dice,
+            "levenshtein_distance": avg_lev,
             "hit_rate_pre_treatment": hits_original_format / total,
             "hit_rate": hits_after_treatment / total
         }

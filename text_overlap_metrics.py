@@ -1,5 +1,4 @@
 from string_utils import StringUtils
-import editdistance
 
 class TextOverlapMetrics:
 
@@ -16,15 +15,4 @@ class TextOverlapMetrics:
         set2 = set(text2.split())
         intersection = len(set1.intersection(set2))
         return (2 * intersection) / (len(set1) + len(set2)) if (len(set1) + len(set2)) != 0 else 0
-
-    @staticmethod
-    def levenshtein_distance(text1, text2):
-        """
-        Calculate the Levenshtein distance between two texts at the word level.
-        """
-        text1, text2 = StringUtils.normalize_text(text1), StringUtils.normalize_text(text2)
-        tokens1 = text1.strip().split()
-        tokens2 = text2.strip().split()
-
-        return editdistance.eval(tokens1, tokens2)
 

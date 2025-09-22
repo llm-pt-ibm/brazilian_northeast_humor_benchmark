@@ -121,7 +121,6 @@ class Evaluator():
             avg_dice = mean(dice_results)
         else:
             avg_dice = None
-            avg_lev = None
 
         punchlines_evaluation = {
             "dice_similarity": avg_dice,

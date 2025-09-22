@@ -11,6 +11,8 @@ from models_loader import ModelsLoader
 
 class ExperimentRunner:
 
+    ALL_TASKS = ['punchlines', 'texts_explanation', 'comic_styles']
+
     def __init__(self):
         dataset_loader = DatasetLoader('./data/brazilian_ne_annotated_humorous_texts.csv')
         self.df = dataset_loader.load_dataset()
@@ -19,23 +21,38 @@ class ExperimentRunner:
         self.models_loader = ModelsLoader()
         self.json_saver = JSONSaver()
 
-    def execute(self, prompting_strategy: str = 'zero-shot'):
+    def execute(self, prompting_strategy: str = 'zero-shot', tasks: list[str] = None):
+        """
+        Executa os experimentos para as tasks selecionadas.
+
+        :param prompting_strategy: 'zero-shot' ou 'few-shot'
+        :param tasks: lista de tasks a executar. Se None, executa todas.
+        """
+        if tasks is None:
+            tasks = self.ALL_TASKS
+
         models = self.models_loader.load_models_from_config_file()
+
         for model in models:
             print(f'--- {model.model_name} ---')
-            print('--- Punchlines phase ---')
-            self.execute_punchlines_experiment(model, prompting_strategy=prompting_strategy)
-            print('--- Texts Explanations phase ---')
-            self.execute_explanations_experiment(model, prompting_strategy=prompting_strategy)
-            print('--- Comic Styles phase ---')
-            self.execute_comic_styles_experiment(model, prompting_strategy=prompting_strategy)
+            
+            if 'punchlines' in tasks:
+                print('--- Punchlines phase ---')
+                self.execute_punchlines_experiment(model, prompting_strategy=prompting_strategy)
+            
+            if 'texts_explanation' in tasks:
+                print('--- Texts Explanations phase ---')
+                self.execute_explanations_experiment(model, prompting_strategy=prompting_strategy)
+            
+            if 'comic_styles' in tasks:
+                print('--- Comic Styles phase ---')
+                self.execute_comic_styles_experiment(model, prompting_strategy=prompting_strategy)
 
     def execute_punchlines_experiment(self, model, prompting_strategy: str = 'zero-shot'):
         model_name = model.model_name.lower()
         filename = os.path.join("predictions", prompting_strategy, model_name, 'punchlines_predictions.json')
         predictions = self._load_existing_predictions(filename)
         include_examples = False if prompting_strategy == 'zero-shot' else True
-        print(f'--- {prompting_strategy.capitalize()} scenario ---')
 
         for i, row in self.df.iterrows():
             video_url = row["video_url"]
@@ -67,7 +84,6 @@ class ExperimentRunner:
         filename = os.path.join("predictions", prompting_strategy, model_name, 'comic_styles_predictions.json')
         predictions = self._load_existing_predictions(filename)
         include_examples = False if prompting_strategy == 'zero-shot' else True
-        print(f'--- {prompting_strategy.capitalize()} scenario ---')
 
         comic_styles = self.comic_styles_manager.get_comic_styles()
         for i, row in self.df.iterrows():
@@ -110,7 +126,6 @@ class ExperimentRunner:
         filename = os.path.join("predictions", prompting_strategy, model_name, 'texts_explanations_predictions.json')
         predictions = self._load_existing_predictions(filename)
         include_examples = False if prompting_strategy == 'zero-shot' else True
-        print(f'--- {prompting_strategy.capitalize()} scenario ---')
 
         for i, row in self.df.iterrows():
             video_url = row["video_url"]

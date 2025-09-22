@@ -72,7 +72,6 @@ class Evaluator():
             punchlines = json.load(f)
         
         dice_results = []
-        levenshtein_results = []
         individual_metrics = []
 
         total = len(punchlines)
@@ -103,12 +102,9 @@ class Evaluator():
 
             if is_after_treatment_valid:
                 dice = TextOverlapMetrics.dice_similarity(predicted, annotated)
-                levenshtein = TextOverlapMetrics.levenshtein_distance(predicted, annotated)
                 dice_results.append(dice)
-                levenshtein_results.append(levenshtein)
             else:
                 dice = None
-                levenshtein = None
 
             individual_metrics.append({
                 "video_url": video_url,
@@ -117,21 +113,18 @@ class Evaluator():
                 "cleaned_prediction": cleaned_prediction, 
                 "formatted_model_punchlines": formatted_model_punchlines, 
                 "dice_similarity": dice,
-                "levenshtein_distance": levenshtein,
                 "is_original_format_valid": is_original_valid,
                 "is_after_treatment_valid": is_after_treatment_valid
             })
 
         if dice_results:
             avg_dice = mean(dice_results)
-            avg_lev = mean(levenshtein_results)
         else:
             avg_dice = None
             avg_lev = None
 
         punchlines_evaluation = {
             "dice_similarity": avg_dice,
-            "levenshtein_distance": avg_lev,
             "hit_rate_pre_treatment": hits_original_format / total,
             "hit_rate": hits_after_treatment / total
         }

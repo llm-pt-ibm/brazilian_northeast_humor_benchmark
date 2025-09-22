@@ -35,7 +35,7 @@ models:
     api_key: 'YOUR_OPENAI_API_KEY'
 ```
 
-Specifically, the stage of evaluating the task of explaining humorous texts involves a judgment model. This can be configured in the file Este pode ser configurado no arquivo ```config/judge_model_config.yaml```.
+Specifically, the stage of evaluating the task of explaining humorous texts involves a judgment model. This can be configured in the file```config/judge_model_config.yaml```.
 
 ## Tasks and scenarios
 

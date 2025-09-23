@@ -71,6 +71,10 @@ class Evaluator():
         with open(file_path, 'r', encoding='utf-8') as f:
             punchlines = json.load(f)
         
+        if not os.path.exists(file_path):
+            print(f"No punchlines predictions found for model '{model_name}' in scenario '{scenario_name}'.")
+            return None, []
+
         dice_results = []
         individual_metrics = []
 
@@ -132,6 +136,11 @@ class Evaluator():
 
     def evaluate_comic_styles_predictions(self, model_name, scenario_name):
         file_path = os.path.join('predictions', scenario_name, model_name, 'comic_styles_predictions.json')
+
+        if not os.path.exists(file_path):
+            print(f"No comic styles predictions found for model '{model_name}' in scenario '{scenario_name}'.")
+            return None, []
+
         with open(file_path, 'r', encoding='utf-8') as f:
             comic_styles_predictions = json.load(f)
 
@@ -256,6 +265,10 @@ class Evaluator():
     def evaluate_texts_explanations_predictions(self, model_name, scenario_name):
         input_path = os.path.join('predictions', scenario_name, model_name, 'texts_explanations_predictions.json')
         output_path = os.path.join('evaluation', scenario_name, 'texts_explanations_evaluation_results.json')
+
+        if not os.path.exists(input_path):
+            print(f"No texts explanations predictions found for model '{model_name}' in scenario '{scenario_name}'.")
+            return None, []
 
         with open(input_path, 'r', encoding='utf-8') as f:
             texts_explanations = json.load(f)

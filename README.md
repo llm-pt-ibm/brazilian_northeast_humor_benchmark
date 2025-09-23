@@ -8,8 +8,8 @@ Below are the instructions for installing the benchmark dependencies, running th
 
 - Git (https://git-scm.com/downloads)
 - Git LFS (https://git-lfs.com/)
-- Python 3.10 ou superior (https://www.python.org/downloads/)
-- pip instalado (https://pip.pypa.io/en/stable/installation/)
+- Python 3.10 or higher (https://www.python.org/downloads/)
+- pip (https://pip.pypa.io/en/stable/installation/)
 
 With the repository cloned and pip installed, run the command in the terminal:
 ```sh
@@ -40,6 +40,7 @@ Specifically, the stage of evaluating the task of explaining humorous texts invo
 ## Tasks and scenarios
 
 Run the benchmark using the ```main.py``` script. By default, it executes all scenarios, all tasks, and evaluation.
+It’s important to note that all results are persisted. Thus, if there was a previous execution, the next one will continue exactly from where it stopped.
 Below are some examples of how the benchmark can be run via the command line, customizing tasks and scenarios.
 
 Run everything (default)
@@ -79,4 +80,23 @@ python main.py --scenario few-shot --tasks punchlines texts_explanation
 
 # Saving results
 
-[...]
+At the end of each run, prediction results are saved as JSON files in folders specific to each model, scenario, and task. For example:
+```sh
+predictions/
+├── few-shot
+│   ├── deepseek-r1-0528-qwen3-8b
+│   │   ├── comic_styles_predictions.json
+│   │   ├── punchlines_predictions.json
+│   │   └── texts_explanations_predictions.json
+```
+
+Model evaluation results are also saved in JSON format, but divided into three types: aggregated metrics for each task for each model; individual metrics for each model's response to prompts; and saving of the judge model's evaluation responses, to persist previously generated responses. For example:
+
+```sh
+evaluation/
+├── few-shot
+│   ├── aggregate_metrics.json
+│   ├── individual_metrics.json
+│   └── texts_explanations_evaluation_results.json
+```
+

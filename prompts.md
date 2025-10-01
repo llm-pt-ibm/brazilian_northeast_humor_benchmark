@@ -87,14 +87,14 @@ Saída:
 
 Descrição: Explicar os elementos que tornam um texto humorístico engraçado.
 
-Prompt (sem exemplos)
+Prompt (zero-shot)
 ```
 Explique o motivo do humor presente no seguinte texto. Aponte os elementos que contribuem para seu efeito cômico.
 Texto humorístico: {humorous_text}
 Responda apenas com a explicação, sem detalhes adicionais.
 ```
 
-Prompt (com exemplos)
+Prompt (few-shot)
 ```
 Explique o motivo do humor presente no seguinte texto humorístico. Aponte os elementos que contribuem para seu efeito cômico.
 Responda apenas com a explicação, sem detalhes adicionais.

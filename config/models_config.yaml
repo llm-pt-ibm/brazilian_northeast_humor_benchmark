@@ -1,20 +1,45 @@
 models:
+# --- OpenAI Api Keys: https://platform.openai.com/api-keys ---
   - provider: openai
     model_name: gpt-4
-    api_key: ''
+    api_key: '>YOUR OPENAI API KEY<'
+
+# --- MaritacaAI API Keys: https://plataforma.maritaca.ai/chaves-de-api ---
+
+  - provider: maritacaai
+    model_name: sabia-3.1
+    api_key: '>YOUR MARITACA API KEY<'
+
+# --- Gemini API Keys: https://ai.google.dev/gemini-api/docs/ ---
 
   - provider: gemini
     model_name: gemini-2.5-flash
-    api_key: ''
+    api_key: '>YOUR GEMINI API KEY<'
+
+# --- IBM Cloud: https://cloud.ibm.com/ ---
 
   - provider: ibmcloud
     model_id: ibm/granite-3-3-8b-instruct
-    api_key: ''
-    service_url: ''
-    project_id: ''
+    api_key: '<YOUR IBM CLOUD API KEY>'
+    service_url: '<YOUR IBM CLOUD TOKEN>'
+    project_id: '<YOUR IBM CLOUD TOKEN>'
 
-#  - provider: huggingface
-#    model_name: ibm-granite/granite-4.0-tiny-preview
-#    task: text-generation
-#    device: -1
-#    token: 
+  - provider: ibmcloud
+    model_id: llama-3-405b-instruct
+    api_key: '<YOUR IBM CLOUD API KEY>'
+    service_url: '<YOUR IBM CLOUD SERVICE URL>'
+    project_id: '<YOUR IBM CLOUD TOKEN>'
+
+# --- Hugging Face Tokens: https://huggingface.co/docs/hub/security-tokens ---
+
+  - provider: huggingface
+    model_name: CEIA-UFG/Gemma-3-Gaia-PT-BR-4b-it
+    task: text-generation
+    device: 0
+    token: '<YOUR HUGGING FACE TOKEN>'
+
+  - provider: huggingface
+    model_name: deepseek-ai/DeepSeek-R1-0528-Qwen3-8B
+    task: text-generation
+    device: 0
+    token: '<YOUR HUGGING FACE TOKEN>'

@@ -1,6 +1,8 @@
 # HuNeBR - Brazilian Northeast Humor Benchmark
 
-Code used to create a benchmark to evaluate LLMs regarding the understanding of humor in texts by comedians from Northeastern Brazil.
+HuNeBR is a benchmark to evaluate LLMs regarding the understanding of humor in texts by comedians from Northeastern Brazil.
+
+
 
 Below are the instructions for installing the benchmark dependencies, running the predictions and evaluation, unfolding tasks and scenarios.
 
@@ -25,6 +27,8 @@ Next, we'll walk you through how to configure the models and run the predictions
 ## Models config
 
 A template file for configuring the models you want to run in the benchmark is at ```config/models_config.yaml```.
+
+The template contains the models we ran in an initial experiment, with the credential fields to be filled in. They are: ``deepseek-r1-0528-qwen3-8b, gemini-2.5-flash, gemma-3-gaia-pt-br-4b-it, gpt-4, granite-3-3-8b-instruct, llama-3-405b-instruct e sabia-3.1.``
 
 Example:
 

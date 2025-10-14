@@ -117,3 +117,38 @@ evaluation/
 │   └── texts_explanations_evaluation_results.json
 ```
 
+# Evaluation metrics
+
+Each model evaluation output includes task-specific metrics as described below:
+
+<b>Punchlines</b>
+  - dice_similarity – Measures the lexical overlap between model-predicted and human-annotated punchline segments using the Dice Similarity Coefficient (0 = no overlap, 1 = perfect match).
+
+  - hit_rate_pre_treatment – Proportion of texts with at least one correctly identified punchline before any normalization or filtering steps.
+
+  - hit_rate – Proportion of texts with at least one correct punchline after post-processing or normalization.
+
+<b>Comic Styles</b>
+
+- f1_score – Per-class F1-score (harmonic mean of precision and recall) for each of the eight comic styles: fun, benevolent humor, nonsense, wit, irony, satire, sarcasm, and cynicism.
+
+- precision – Per-class precision, i.e., the proportion of predicted positives that are correct.
+
+- recall – Per-class recall, i.e., the proportion of actual positives correctly predicted.
+
+- accuracy – Per-class accuracy, representing the fraction of correct predictions (both positive and negative) for each style.
+
+- f1_macro – Macro-averaged F1-score across all styles, giving equal weight to each class regardless of frequency.
+
+- f1_micro – Micro-averaged F1-score, aggregating predictions across all classes and weighting by class frequency.
+
+- hit_rate_pre_treatment – Fraction of texts where at least one style was correctly detected before post-processing.
+
+- hit_rate – Fraction of texts where at least one style was correctly detected after post-processing.
+
+- omission_rate – Proportion of texts for which the model failed to output any classification.
+
+<b>Texts Explanations</b>
+
+- Mean agreement score (1–5 Likert scale) between model-generated and human-annotated humor explanations, rated by an external judge model.
+Higher values indicate stronger conceptual alignment and fewer omissions or distortions.

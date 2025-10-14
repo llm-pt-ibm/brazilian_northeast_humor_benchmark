@@ -10,7 +10,7 @@ models:
     model_name: sabia-3.1
     api_key: '>YOUR MARITACA API KEY<'
 
-# --- Gemini API Keys: https://ai.google.dev/gemini-api/docs/ ---
+# --- Gemini API Keys: https://ai.google.dev/gemini-api/docs/api-key ---
 
   - provider: gemini
     model_name: gemini-2.5-flash
@@ -21,7 +21,7 @@ models:
   - provider: ibmcloud
     model_id: ibm/granite-3-3-8b-instruct
     api_key: '<YOUR IBM CLOUD API KEY>'
-    service_url: '<YOUR IBM CLOUD TOKEN>'
+    service_url: '<YOUR IBM CLOUD SERVICE URL>'
     project_id: '<YOUR IBM CLOUD TOKEN>'
 
   - provider: ibmcloud

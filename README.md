@@ -95,27 +95,6 @@ Run specific scenario and tasks together
 python main.py --scenario few-shot --tasks punchlines texts_explanation
 ```
 
-# Saving results
-
-At the end of each run, prediction results are saved as JSON files in folders specific to each model, scenario, and task. For example:
-```sh
-predictions/
-├── few-shot
-│   ├── deepseek-r1-0528-qwen3-8b
-│   │   ├── comic_styles_predictions.json
-│   │   ├── punchlines_predictions.json
-│   │   └── texts_explanations_predictions.json
-```
-
-Model evaluation results are also saved in JSON format, but divided into three types: aggregated metrics for each task for each model; individual metrics for each model's response to prompts; and saving of the judge model's evaluation responses, to persist previously generated responses. For example:
-
-```sh
-evaluation/
-├── few-shot
-│   ├── aggregate_metrics.json
-│   ├── individual_metrics.json
-│   └── texts_explanations_evaluation_results.json
-```
 
 # Evaluation metrics
 
@@ -152,3 +131,29 @@ Each model evaluation output includes task-specific metrics as described below:
 
 - Mean agreement score (1–5 Likert scale) between model-generated and human-annotated humor explanations, rated by an external judge model.
 Higher values indicate stronger conceptual alignment and fewer omissions or distortions.
+
+# Saving results
+
+At the end of each run, prediction results are saved as JSON files in folders specific to each model, scenario, and task. For example:
+```sh
+predictions/
+├── few-shot
+│   ├── deepseek-r1-0528-qwen3-8b
+│   │   ├── comic_styles_predictions.json
+│   │   ├── punchlines_predictions.json
+│   │   └── texts_explanations_predictions.json
+```
+
+Model evaluation results are also saved in JSON format, but divided into three types: aggregated metrics for each task for each model; individual metrics for each model's response to prompts; and saving of the judge model's evaluation responses, to persist previously generated responses. For example:
+
+```sh
+evaluation/
+├── few-shot
+│   ├── aggregate_metrics.json
+│   ├── individual_metrics.json
+│   └── texts_explanations_evaluation_results.json
+```
+
+# Results exploration examples
+
+Some notebooks with exploration of both aggregate and individual metrics are available in the ``results_exploration.ipynb`` and ``qualitative_exploration.ipynb`` files.

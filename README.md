@@ -2,7 +2,20 @@
 
 HuNeBR is a benchmark to evaluate LLMs regarding the understanding of humor in texts by comedians from Northeastern Brazil.
 
+![Input and output examples.](visualizations/pipeline_example.png)
 
+The HuNeBR benchmark includes three tasks and two prompting scenarios (zero-shot and few-shot). In the zero-shot setup, no examples are provided; in the few-shot setup, two examples are added to the prompt using a fixed seed. For comic style classification, one positive and one negative example are provided per style.
+
+1. <b>Punchline Identification.</b>
+The model receives the full humorous text and must return only the punchline segments — the parts that resolve an incongruity and trigger the comic effect — formatted as a structured list without extra commentary.
+
+2. <b>Comic Style Classification.</b>
+Based on eight styles (fun, benevolent humor, nonsense, wit, irony, sarcasm, satire, and cynicism), the model is asked whether a specific style is present in the text.
+The output is binary: 1 (present) or 0 (absent). Multiple styles may co-occur in a single text.
+
+3. <b>Humor Reasoning (Explanation).</b>
+The model must provide a concise explanation of why the text is humorous, identifying the elements that produce the comic effect.
+This task assesses the model’s ability to interpret and articulate humor mechanisms rather than merely recognize them.
 
 Below are the instructions for installing the benchmark dependencies, running the predictions and evaluation, unfolding tasks and scenarios.
 
@@ -39,7 +52,7 @@ models:
     api_key: 'YOUR_OPENAI_API_KEY'
 ```
 
-Specifically, the stage of evaluating the task of explaining humorous texts involves a judgment model. This can be configured in the file```config/judge_model_config.yaml```.
+Specifically, the stage of evaluating the task of explaining humorous texts involves a judgment model. This can be configured in the file ```config/judge_model_config.yaml```.
 
 ## Tasks and scenarios
 

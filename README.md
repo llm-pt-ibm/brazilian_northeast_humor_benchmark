@@ -54,6 +54,32 @@ models:
 
 Specifically, the stage of evaluating the task of explaining humorous texts involves a judgment model. This can be configured in the file ```config/judge_model_config.yaml```.
 
+## Supported LLM Platforms
+
+This project provides a unified interface for multiple Large Language Model (LLM) providers, allowing flexible integration across various APIs and infrastructures.
+The following LLM platforms are currently supported:
+
+1. OpenAI / MaritacaAI
+- Key Configs: api_key, model_name, base_url
+- Default Base URL: https://api.openai.com/v1
+- Supports both OpenAI models (e.g., gpt-4, gpt-4o-mini) and compatible APIs such as <b>MaritacaAI</b>.
+
+2. Hugging Face Hub
+- Key Configs: model_name, task, token, device (device="cpu" → runs the model on the CPU (slower, but universal); device=0 → runs the model on GPU 0;device=1 → runs the model on GPU 1, and so on)
+- Enables loading of transformer-based models from the Hugging Face Hub, with support for multiple tasks (e.g., text generation, classification).
+
+3. Google Gemini
+- Key Configs: api_key, model_name
+- Integrates with Google’s Gemini API (PaLM successor), supporting text reasoning and multimodal capabilities.
+
+4. Anthropic Claude
+- Key Configs: api_key, model_name
+- Provides access to Claude models (e.g., Claude 3 family) through the Anthropic API.
+
+5. IBM Cloud Watsonx.ai
+- Key Configs: model_id, api_key, service_url, project_id
+- Connects to IBM’s Watsonx.ai platform for enterprise-grade LLMs and foundation models.
+
 ## Tasks and scenarios
 
 Run the benchmark using the ```main.py``` script. By default, it executes all scenarios, all tasks, and evaluation.

@@ -157,3 +157,8 @@ evaluation/
 # Results exploration examples
 
 Some notebooks with exploration of both aggregate and individual metrics are available in the ``results_exploration.ipynb`` and ``qualitative_exploration.ipynb`` files.
+
+## License
+
+- **Code:** [MIT License](./LICENSE)
+- **Data:** [CC BY-NC 4.0](./LICENSE-data.txt)

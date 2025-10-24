@@ -187,4 +187,4 @@ Some notebooks with exploration of both aggregate and individual metrics are ava
 ## License
 
 - **Code:** [MIT License](./LICENSE)
-- **Data:** [CC BY-NC 4.0](./LICENSE-data.txt)
+- **Data:** [CC BY-NC 4.0](./LICENSE-DATA.txt)

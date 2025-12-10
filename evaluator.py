@@ -316,6 +316,7 @@ class Evaluator():
                 "video_url": video_url,
                 **current_row,
                 "judge_model_results": agreement_level_response_json,
+                "cleaned_prediction": predicted
             }
 
             processed_results[model_name][video_url] = current_result
